@@ -9,7 +9,7 @@ import (
 
 // validateSeverity ensures the string cast by Viper matches our strict enums.
 func validateSeverity(check model.CheckConfig) error {
-	switch check.Severity{
+	switch check.Severity {
 	case model.SeverityInfo, model.SeverityBlocker, model.SeverityWarning:
 		return nil
 	default:
@@ -18,10 +18,10 @@ func validateSeverity(check model.CheckConfig) error {
 }
 
 // validateType ensures the check driver exists.
-// Note: We are using a static switch here for now. Later, this will be 
+// Note: We are using a static switch here for now. Later, this will be
 // replaced by asking the internal/registry package!
 func validateCheckTypes(check model.CheckConfig) error {
-	switch check.Type{
+	switch check.Type {
 	case model.TypeCommandExists, model.TypeDirectoryExists, model.TypeEnvExists, model.TypeFileExists, model.TypeHttpReachable, model.TypePortFree, model.TypeTcpReachable:
 		return nil
 	default:
@@ -43,7 +43,7 @@ func ValidateConfig(cfg *model.ClonesageConfig) error {
 			errs = append(errs, fmt.Sprintf("Checks[%d]: name cannot be blank", i))
 		}
 
-		if err := validateSeverity(check); err != nil{
+		if err := validateSeverity(check); err != nil {
 			errs = append(errs, fmt.Sprintf("Checks[%d] (%s): %v", i, check.Name, err))
 
 		}
@@ -53,9 +53,9 @@ func ValidateConfig(cfg *model.ClonesageConfig) error {
 		}
 	}
 
-	if len(errs) >0 {
+	if len(errs) > 0 {
 		return fmt.Errorf("Configuration validation failed:\n  - %s", strings.Join(errs, "\n  - "))
 	}
 
 	return nil
-} 
+}

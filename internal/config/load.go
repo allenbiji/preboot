@@ -12,7 +12,7 @@ func Load() (*model.ClonesageConfig, error) {
 
 	v.SetConfigFile("sage-auto.yaml")
 
-	err:= v.ReadInConfig()
+	err := v.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("Error reading config file: %w", err)
@@ -20,12 +20,12 @@ func Load() (*model.ClonesageConfig, error) {
 	}
 
 	v.SetConfigFile("sage.yaml")
-	if err := v.MergeInConfig(); err != nil{
+	if err := v.MergeInConfig(); err != nil {
 		return nil, fmt.Errorf("Error merging config files: %w", err)
 	}
 
 	var cfg model.ClonesageConfig
-	if err := v.Unmarshal(&cfg); err != nil{
+	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("There was an error in unmarshaling the yaml config: %w", err)
 	}
 
