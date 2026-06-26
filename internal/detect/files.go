@@ -28,7 +28,7 @@ func ExtractEnvKeys(filePath string) (map[string]string, error) {
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("The file could not be opened", err)
+		return nil, fmt.Errorf("The file could not be opened")
 	}
 
 	defer file.Close()
