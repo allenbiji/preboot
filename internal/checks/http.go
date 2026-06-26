@@ -3,6 +3,8 @@ package checks
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/allenbiji/clone-sage/internal/model"
 	"github.com/allenbiji/clone-sage/internal/registry"
@@ -10,41 +12,47 @@ import (
 
 type HttpReachableCheck struct {
 	Address string
+	Timeout time.Duration
 }
 
-//execute method for the http_reachable check
 func (h *HttpReachableCheck) Execute() error {
 	client := &http.Client{
-		Timeout: 2000, //hardcoded for now
+		Timeout: h.Timeout,
 	}
 
 	resp, err := client.Get(h.Address)
 	if err != nil {
-		return fmt.Errorf("the http address '%s' is not reachable: %w", h.Address, err)
+		return fmt.Errorf("http address %q is not reachable: %w", h.Address, err)
 	}
-	
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("address '%s' returned unhealthy status code: %d", h.Address, resp.StatusCode)
+		return fmt.Errorf("http address %q returned unhealthy status code: %d", h.Address, resp.StatusCode)
 	}
 
 	return nil
 }
 
-//build a factory for the http_reachable check
 func buildHttpReachableCheck(cfg model.CheckConfig) (registry.Check, error) {
 	address, ok := cfg.Options["address"]
 	if !ok || address == "" {
-		return nil, fmt.Errorf("The http_reachable check requires a 'address' option")
+		return nil, fmt.Errorf("http_reachable check requires an 'address' option")
+	}
+
+	timeout := 5 * time.Second
+	if ms, ok := cfg.Options["timeout_ms"]; ok {
+		if v, err := strconv.Atoi(ms); err == nil {
+			timeout = time.Duration(v) * time.Millisecond
+		}
 	}
 
 	return &HttpReachableCheck{
 		Address: address,
+		Timeout: timeout,
 	}, nil
 }
 
-//registers the check in the registry
 func init() {
 	registry.Register(model.TypeHttpReachable, buildHttpReachableCheck)
 }

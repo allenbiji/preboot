@@ -1,7 +1,7 @@
-package sage
+package main
 
 import "github.com/allenbiji/clone-sage/internal/cli"
 
-func Main() {
+func main() {
 	cli.Execute()
 }

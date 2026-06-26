@@ -1,7 +1,7 @@
 # binaries
 bin/
 dist/
-
+.claude/
 # IDE
 .vscode/
 .idea/
@@ -11,3 +11,6 @@ dist/
 
 # env
 .env
+
+# binary
+sage

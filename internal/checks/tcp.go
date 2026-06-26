@@ -3,6 +3,8 @@ package checks
 import (
 	"fmt"
 	"net"
+	"strconv"
+	"time"
 
 	"github.com/allenbiji/clone-sage/internal/model"
 	"github.com/allenbiji/clone-sage/internal/registry"
@@ -10,13 +12,13 @@ import (
 
 type TcpReachableCheck struct {
 	Address string
+	Timeout time.Duration
 }
 
-// execute method for the tcp_reachable check
 func (t *TcpReachableCheck) Execute() error {
-	conn, err := net.DialTimeout("tcp", t.Address, 3000) //timeout hardcoded for now
+	conn, err := net.DialTimeout("tcp", t.Address, t.Timeout)
 	if err != nil {
-		return fmt.Errorf("The tcp address '%s' is  not reachable", t.Address)
+		return fmt.Errorf("tcp address %q is not reachable: %w", t.Address, err)
 	}
 
 	defer conn.Close()
@@ -24,19 +26,25 @@ func (t *TcpReachableCheck) Execute() error {
 	return nil
 }
 
-// build a factory for the tcp_reachable check
 func buildTcpReachableCheck(cfg model.CheckConfig) (registry.Check, error) {
 	address, ok := cfg.Options["address"]
 	if !ok || address == "" {
-		return nil, fmt.Errorf("The tcp_reachable check requires a 'address' option")
+		return nil, fmt.Errorf("tcp_reachable check requires an 'address' option")
+	}
+
+	timeout := 5 * time.Second
+	if ms, ok := cfg.Options["timeout_ms"]; ok {
+		if v, err := strconv.Atoi(ms); err == nil {
+			timeout = time.Duration(v) * time.Millisecond
+		}
 	}
 
 	return &TcpReachableCheck{
 		Address: address,
+		Timeout: timeout,
 	}, nil
 }
 
-// registers the check in the registry
 func init() {
 	registry.Register(model.TypeTcpReachable, buildTcpReachableCheck)
 }

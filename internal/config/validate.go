@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/clone-sage/internal/registry"
 )
 
 // validateSeverity ensures the string cast by Viper matches our strict enums.
@@ -17,16 +18,12 @@ func validateSeverity(check model.CheckConfig) error {
 	}
 }
 
-// validateType ensures the check driver exists.
-// Note: We are using a static switch here for now. Later, this will be
-// replaced by asking the internal/registry package!
+// validateCheckTypes ensures the check driver exists in the registry.
 func validateCheckTypes(check model.CheckConfig) error {
-	switch check.Type {
-	case model.TypeCommandExists, model.TypeDirectoryExists, model.TypeEnvExists, model.TypeFileExists, model.TypeHttpReachable, model.TypePortFree, model.TypeTcpReachable:
-		return nil
-	default:
-		return fmt.Errorf("Invalid check type '%s' (allowed: env_exists, file_exists, directory_exists, http_reachable, port_free, command_exists, tcp_reachable)", check.Type)
+	if !registry.IsKnownType(check.Type) {
+		return fmt.Errorf("unknown check type %q", check.Type)
 	}
+	return nil
 }
 
 // ValidateConfig acts as the runtime firewall, ensuring the unmarshaled YAML data
