@@ -18,7 +18,7 @@ func NewValidateCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Println("Configuration is valid!")
+			fmt.Println("✅ Configuration is valid!")
 			return nil
 		},
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/allenbiji/clone-sage/internal/registry"
 )
 
-// ANSI Color Codes for pretty terminal output
+// ANSI Color Codes for terminal output
 const (
 	Reset  = "\033[0m"
 	Red    = "\033[31m"

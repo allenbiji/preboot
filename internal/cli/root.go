@@ -12,6 +12,9 @@ func RootCmd() *cobra.Command {
 		Use:   "sage",
 		Short: "Clonesage handles local setup diagnostics",
 		Long:  "An open-source CLI for diagnosing local development setup failures in repositories.",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			printBanner()
+		},
 	}
 
 	rootCmd.AddCommand(NewCheckCmd())
