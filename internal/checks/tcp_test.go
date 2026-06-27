@@ -38,6 +38,21 @@ func TestBuildTcpReachableCheck(t *testing.T) {
 			opts:        map[string]string{"address": "127.0.0.1:1", "timeout_ms": "abc"},
 			wantTimeout: 5 * time.Second,
 		},
+		{
+			name:    "no port",
+			opts:    map[string]string{"address": "localhost"},
+			wantErr: "host:port format",
+		},
+		{
+			name:    "bare word",
+			opts:    map[string]string{"address": "notanaddress"},
+			wantErr: "host:port format",
+		},
+		{
+			name:    "empty host",
+			opts:    map[string]string{"address": ":8080"},
+			wantErr: "has no host",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

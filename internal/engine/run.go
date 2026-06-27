@@ -96,6 +96,10 @@ func Run(cfg *model.ClonesageConfig, quickMode bool) error {
 		}
 	}
 
+	if passedCount == 0 && failedCount == 0 {
+		fmt.Fprintln(os.Stderr, "warn: no checks were configured")
+	}
+
 	// Print the Summary
 	fmt.Println("\n----------------------------------------")
 	if hasBlockerFailed {

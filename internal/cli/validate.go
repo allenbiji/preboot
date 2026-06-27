@@ -9,12 +9,14 @@ import (
 
 // this is the command used to validate the user-defined checks
 func NewValidateCmd() *cobra.Command {
+	var cfgFile string
+
 	validCmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Used to validate the checks in sage.yml",
 		Long:  "This command can be to used to verify if the user-defined checks in sage.yml are valid or not",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if _, err := config.Load(); err != nil {
+			if _, err := config.LoadFrom(cfgFile); err != nil {
 				return err
 			}
 
@@ -22,6 +24,8 @@ func NewValidateCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	validCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "Path to custom sage.yml")
 
 	return validCmd
 }

@@ -20,8 +20,9 @@ func ScanRepo() *model.ClonesageConfig {
 	}
 
 	return &model.ClonesageConfig{
-		Version: 1,
-		Checks: checks,
+		Version:  1,
+		Defaults: map[string]interface{}{"timeout_ms": 5000, "strict": false},
+		Checks:   checks,
 	}
 
 }

@@ -3,6 +3,7 @@ package detect
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -65,7 +66,14 @@ func detectDockerCompose() []model.CheckConfig{
 		return checks
 	}
 
-	for serviceName, service := range parsed.Services{
+	serviceNames := make([]string, 0, len(parsed.Services))
+	for name := range parsed.Services {
+		serviceNames = append(serviceNames, name)
+	}
+	slices.Sort(serviceNames)
+
+	for _, serviceName := range serviceNames {
+		service := parsed.Services[serviceName]
 		for _, portMapping := range service.Ports {
 			hostPort := extractHostPort(portMapping)
 
@@ -77,11 +85,11 @@ func detectDockerCompose() []model.CheckConfig{
 			}
 
 			checks = append(checks, model.CheckConfig{
-				Name: "port-free-" + hostPort,
-				Type: model.TypePortFree,
+				Name:     "port-free-" + hostPort,
+				Type:     model.TypePortFree,
 				Severity: model.SeverityBlocker,
-				Options: map[string]string{"port": hostPort},
-				Message: "Port " + hostPort + " is in use. Stop background services so " + serviceName + " can start.",
+				Options:  map[string]string{"port": hostPort},
+				Message:  "Port " + hostPort + " is in use. Stop background services so " + serviceName + " can start.",
 			})
 		}
 	}
