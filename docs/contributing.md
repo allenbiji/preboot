@@ -30,6 +30,8 @@ go test ./internal/checks/... -v
 go test ./internal/config/... -run TestLoad_BothFiles -v
 ```
 
+See [Testing Guide](testing.md) for the full test inventory, available helpers, and the patterns every test must follow.
+
 ### Vet and lint
 
 ```bash
@@ -45,6 +47,17 @@ There is no linter configuration in the repo beyond the standard `go vet`. If yo
 ### Makefile
 
 Run `make help` to see all available targets. Use `make ci` before pushing to run the full build + vet + test chain locally.
+
+### Write tests for everything you add
+
+Every new check type, detection rule, config behaviour, or engine change must come with tests. The repo's test patterns are documented in [Testing Guide](testing.md). As a checklist:
+
+- New check type → `TestBuild*` (option validation) + `TestCheck_Execute` (runtime behaviour) in `internal/checks/<type>_test.go`
+- New detect rule → tests in `internal/detect/detect_test.go` using `t.TempDir` + `chdir`
+- New config field or merge rule → table-driven case in `merge_test.go` or `validate_test.go`
+- Engine change → case in `run_test.go`
+
+If a PR adds behaviour with no test coverage it will not be merged.
 
 ### Test patterns
 
@@ -236,7 +249,9 @@ Commit both `go.mod` and `go.sum` with every dependency change.
 
 ## Commit style
 
-Follow conventional commits:
+This repo accepts two equivalent styles — use whichever fits the commit best:
+
+### Conventional commits
 
 ```
 feat: add process_running check type
@@ -246,11 +261,26 @@ test: cover negative cases for port_free
 refactor: extract timeout resolution into helper
 ```
 
+### Go module style (package-scoped)
+
+Prefix with the package or sub-system being changed, followed by a short imperative description. This mirrors the style used in the Go standard library and many Go open-source projects:
+
+```
+checks: add process_running check type
+detect: auto-detect Node.js projects
+engine: skip blank-name checks with a warning
+config: reject version values outside 1–9
+registry: panic message now includes type name
+```
+
+Both styles are accepted. Use mod-style when the change is clearly scoped to one package; use conventional commits for cross-cutting changes (`docs:`, `test:`, `chore:`).
+
 ---
 
 ## Pull request checklist
 
 - [ ] `make ci` passes (build + vet + test)
+- [ ] New behaviour is covered by tests (see [Testing Guide](testing.md))
 - [ ] New public functions/types have a one-line doc comment
 - [ ] New check types are documented in `docs/checks.md`
 - [ ] `go.mod` and `go.sum` are up to date

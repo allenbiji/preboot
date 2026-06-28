@@ -45,6 +45,7 @@ Running Preboot Diagnostics...
 | [Check Types](checks.md) | All 7 check types with option reference and examples |
 | [Architecture](architecture.md) | Package layout, data flow, extension points |
 | [Contributing](contributing.md) | Dev setup, testing, adding new check types |
+| [Testing Guide](testing.md) | Full test inventory, helpers, and test patterns |
 | [Deployment Guide](deployment.md) | Building, distributing, and shipping Preboot |
 
 ---
