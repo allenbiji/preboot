@@ -21,7 +21,7 @@ git clone https://github.com/allenbiji/preboot.git
 cd preboot
 
 # Build and place the binary on your PATH
-go build -o /usr/local/bin/preboot ./cmd/sage
+go build -o /usr/local/bin/preboot ./cmd/preboot
 
 # Verify
 preboot --version
@@ -32,7 +32,7 @@ preboot --version
 If the module is published to a Go module proxy:
 
 ```bash
-go install github.com/allenbiji/preboot/cmd/sage@latest
+go install github.com/allenbiji/preboot/cmd/preboot@latest
 ```
 
 The binary lands in `$(go env GOPATH)/bin/preboot`. Make sure that directory is on your `$PATH`.
@@ -43,7 +43,7 @@ Once releases are published to GitHub Releases:
 
 ```bash
 # Linux amd64 example
-curl -L https://github.com/allenbiji/preboot/releases/latest/download/sage-linux-amd64 \
+curl -L https://github.com/allenbiji/preboot/releases/latest/download/preboot-linux-amd64 \
   -o /usr/local/bin/preboot
 chmod +x /usr/local/bin/preboot
 ```

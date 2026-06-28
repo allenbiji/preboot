@@ -110,7 +110,7 @@ builds:
 
 archives:
   - id: preboot
-    name_template: "sage_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "preboot_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip
@@ -231,29 +231,29 @@ brew install allenbiji/tap/preboot
 2. Create `Formula/preboot.rb` in that repo:
 
 ```ruby
-class Sage < Formula
+class Preboot < Formula
   desc "Diagnose local setup failures in Go repositories"
   homepage "https://github.com/allenbiji/preboot"
   version "0.2.0"
 
   on_macos do
     on_arm do
-      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/sage_#{version}_darwin_arm64.tar.gz"
+      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/preboot_#{version}_darwin_arm64.tar.gz"
       sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
     end
     on_intel do
-      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/sage_#{version}_darwin_amd64.tar.gz"
+      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/preboot_#{version}_darwin_amd64.tar.gz"
       sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/sage_#{version}_linux_arm64.tar.gz"
+      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/preboot_#{version}_linux_arm64.tar.gz"
       sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
     end
     on_intel do
-      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/sage_#{version}_linux_amd64.tar.gz"
+      url "https://github.com/allenbiji/preboot/releases/download/v#{version}/preboot_#{version}_linux_amd64.tar.gz"
       sha256 "REPLACE_WITH_SHA256_FROM_CHECKSUMS_TXT"
     end
   end

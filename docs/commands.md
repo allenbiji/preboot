@@ -199,5 +199,5 @@ Cobra supports automatic shell completion. Once the project exposes it:
 ```bash
 preboot completion bash  >> ~/.bashrc
 preboot completion zsh   >> ~/.zshrc
-preboot completion fish  > ~/.config/fish/completions/sage.fish
+preboot completion fish  > ~/.config/fish/completions/preboot.fish
 ```
