@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/allenbiji/clone-sage/internal/detect"
+	"github.com/allenbiji/preboot/internal/detect"
 )
 
 func TestExtractEnvKeys(t *testing.T) {

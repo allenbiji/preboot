@@ -4,13 +4,13 @@ import (
 	"strings"
 	"testing"
 
-	_ "github.com/allenbiji/clone-sage/internal/checks"
-	"github.com/allenbiji/clone-sage/internal/config"
-	"github.com/allenbiji/clone-sage/internal/model"
+	_ "github.com/allenbiji/preboot/internal/checks"
+	"github.com/allenbiji/preboot/internal/config"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
-func validCfg() *model.ClonesageConfig {
-	return &model.ClonesageConfig{
+func validCfg() *model.PrebootConfig {
+	return &model.PrebootConfig{
 		Version: 1,
 		Checks: []model.CheckConfig{
 			{Name: "x", Type: model.TypeFileExists, Severity: model.SeverityBlocker},
@@ -21,46 +21,46 @@ func validCfg() *model.ClonesageConfig {
 func TestValidateConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		mutate  func(*model.ClonesageConfig)
+		mutate  func(*model.PrebootConfig)
 		wantErr string
 	}{
 		{
 			name:   "valid config",
-			mutate: func(c *model.ClonesageConfig) {},
+			mutate: func(c *model.PrebootConfig) {},
 		},
 		{
 			name:    "version 0",
-			mutate:  func(c *model.ClonesageConfig) { c.Version = 0 },
+			mutate:  func(c *model.PrebootConfig) { c.Version = 0 },
 			wantErr: "Unsupported config version: 0",
 		},
 		{
 			name:    "version 2",
-			mutate:  func(c *model.ClonesageConfig) { c.Version = 2 },
+			mutate:  func(c *model.PrebootConfig) { c.Version = 2 },
 			wantErr: "Unsupported config version: 2",
 		},
 		{
 			name:    "blank name",
-			mutate:  func(c *model.ClonesageConfig) { c.Checks[0].Name = "" },
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Name = "" },
 			wantErr: "name cannot be blank",
 		},
 		{
 			name:    "whitespace name",
-			mutate:  func(c *model.ClonesageConfig) { c.Checks[0].Name = "   " },
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Name = "   " },
 			wantErr: "name cannot be blank",
 		},
 		{
 			name:    "invalid severity",
-			mutate:  func(c *model.ClonesageConfig) { c.Checks[0].Severity = "critical" },
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Severity = "critical" },
 			wantErr: "Invalid severity",
 		},
 		{
 			name:    "unknown check type",
-			mutate:  func(c *model.ClonesageConfig) { c.Checks[0].Type = "does_not_exist" },
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Type = "does_not_exist" },
 			wantErr: "unknown check type",
 		},
 		{
 			name: "multiple errors accumulated",
-			mutate: func(c *model.ClonesageConfig) {
+			mutate: func(c *model.PrebootConfig) {
 				c.Checks[0].Name = ""
 				c.Checks[0].Severity = "critical"
 			},

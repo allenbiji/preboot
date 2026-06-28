@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 // ── ExtractEnvKeys edge cases ─────────────────────────────────────────────────

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/allenbiji/clone-sage/internal/engine"
+	"github.com/allenbiji/preboot/internal/engine"
 	"github.com/spf13/cobra"
 )
 
 func RootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:           "sage",
-		Short:         "Clonesage handles local setup diagnostics",
+		Use:           "preboot",
+		Short:         "Preboot handles local setup diagnostics",
 		Long:          "An open-source CLI for diagnosing local development setup failures in repositories.",
 		SilenceErrors: true,
 		SilenceUsage:  true,

@@ -3,8 +3,8 @@ package config_test
 import (
 	"testing"
 
-	"github.com/allenbiji/clone-sage/internal/config"
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/config"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 func TestMergeDefaults(t *testing.T) {
@@ -48,7 +48,7 @@ func TestMergeDefaults(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := &model.ClonesageConfig{Defaults: tt.defaults}
+			c := &model.PrebootConfig{Defaults: tt.defaults}
 			config.MergeDefaults(c)
 
 			if c.Defaults["strict"] != tt.wantStrict {

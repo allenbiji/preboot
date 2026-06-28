@@ -1,9 +1,9 @@
 package config
 
-import "github.com/allenbiji/clone-sage/internal/model"
+import "github.com/allenbiji/preboot/internal/model"
 
 // this function is to ensure that the system always has defaults to fallback to
-func MergeDefaults(c *model.ClonesageConfig) {
+func MergeDefaults(c *model.PrebootConfig) {
 	if c.Defaults == nil {
 		c.Defaults = make(map[string]interface{})
 	}

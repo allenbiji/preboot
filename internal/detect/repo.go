@@ -1,8 +1,8 @@
 package detect
 
-import "github.com/allenbiji/clone-sage/internal/model"
+import "github.com/allenbiji/preboot/internal/model"
 
-func ScanRepo() *model.ClonesageConfig {
+func ScanRepo() *model.PrebootConfig {
 	var checks []model.CheckConfig
 
 	checks = append(checks, detectGo()...)
@@ -19,7 +19,7 @@ func ScanRepo() *model.ClonesageConfig {
 		})
 	}
 
-	return &model.ClonesageConfig{
+	return &model.PrebootConfig{
 		Version:  1,
 		Defaults: map[string]interface{}{"timeout_ms": 5000, "strict": false},
 		Checks:   checks,

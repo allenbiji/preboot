@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 func generateEnvChecks(fileName string) []model.CheckConfig {

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/allenbiji/clone-sage/internal/config"
+	"github.com/allenbiji/preboot/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -13,8 +13,8 @@ func NewValidateCmd() *cobra.Command {
 
 	validCmd := &cobra.Command{
 		Use:   "validate",
-		Short: "Used to validate the checks in sage.yml",
-		Long:  "This command can be to used to verify if the user-defined checks in sage.yml are valid or not",
+		Short: "Used to validate the checks in preboot.yml",
+		Long:  "This command can be to used to verify if the user-defined checks in preboot.yml are valid or not",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if _, err := config.LoadFrom(cfgFile); err != nil {
 				return err
@@ -25,7 +25,7 @@ func NewValidateCmd() *cobra.Command {
 		},
 	}
 
-	validCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "Path to custom sage.yml")
+	validCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "Path to custom preboot.yml")
 
 	return validCmd
 }

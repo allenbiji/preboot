@@ -3,7 +3,7 @@ package registry
 import (
 	"fmt"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 // Check is the strict contract that every single diagnostic test must follow.

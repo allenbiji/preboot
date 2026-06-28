@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/allenbiji/clone-sage/internal/model"
-	"github.com/allenbiji/clone-sage/internal/registry"
+	"github.com/allenbiji/preboot/internal/model"
+	"github.com/allenbiji/preboot/internal/registry"
 )
 
 // ANSI Color Codes for terminal output
@@ -24,8 +24,8 @@ var ErrCheckFailed = errors.New("one or more blocker checks failed")
 
 // Run executes the diagnostics. It returns nil if the environment is healthy,
 // or ErrCheckFailed if a blocker check failed.
-func Run(cfg *model.ClonesageConfig, quickMode bool) error {
-	fmt.Fprintln(os.Stderr, colorize(Cyan, "Running CloneSage Diagnostics..."))
+func Run(cfg *model.PrebootConfig, quickMode bool) error {
+	fmt.Fprintln(os.Stderr, colorize(Cyan, "Running Preboot Diagnostics..."))
 
 	hasBlockerFailed := false
 	passedCount := 0

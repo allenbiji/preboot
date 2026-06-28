@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/allenbiji/clone-sage/internal/detect"
+	"github.com/allenbiji/preboot/internal/detect"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -14,12 +14,12 @@ func NewInitCmd() *cobra.Command {
 
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "Run init to initalize the project and generate sage-auto.yml",
-		Long:  "Run this command to scan your entire repository and from the inferences in your repo, a sage-auto.yml file will be generated and which can also be extended via a sage.yml file",
+		Short: "Run init to initalize the project and generate preboot-auto.yml",
+		Long:  "Run this command to scan your entire repository and from the inferences in your repo, a preboot-auto.yml file will be generated and which can also be extended via a preboot.yml file",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if _, err := os.Stat("sage-auto.yml"); err == nil && !force {
-				return fmt.Errorf("sage-auto.yml already exists — use --force to overwrite")
+			if _, err := os.Stat("preboot-auto.yml"); err == nil && !force {
+				return fmt.Errorf("preboot-auto.yml already exists — use --force to overwrite")
 			}
 
 			// Run ScanRepo() to generate baseline
@@ -37,18 +37,18 @@ func NewInitCmd() *cobra.Command {
 				return err
 			}
 
-			// Write generated baseline into sage-auto.yml file with standard 0644 file permissions
-			if err := os.WriteFile("sage-auto.yml", configYaml, 0644); err != nil {
+			// Write generated baseline into preboot-auto.yml file with standard 0644 file permissions
+			if err := os.WriteFile("preboot-auto.yml", configYaml, 0644); err != nil {
 				return err
 			}
 
-			fmt.Fprintln(os.Stderr, "Baseline has been generated successfully in sage-auto.yml!")
-			fmt.Fprintln(os.Stderr, "Run sage check to verify your local environment")
+			fmt.Fprintln(os.Stderr, "Baseline has been generated successfully in preboot-auto.yml!")
+			fmt.Fprintln(os.Stderr, "Run preboot check to verify your local environment")
 			return nil
 		},
 	}
 
-	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite existing sage-auto.yml")
+	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite existing preboot-auto.yml")
 
 	return initCmd
 }

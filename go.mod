@@ -1,4 +1,4 @@
-module github.com/allenbiji/clone-sage
+module github.com/allenbiji/preboot
 
 go 1.24.6
 

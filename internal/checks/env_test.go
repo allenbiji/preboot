@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 func TestEnvCheck_Execute(t *testing.T) {

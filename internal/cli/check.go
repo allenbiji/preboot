@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/allenbiji/clone-sage/internal/config"
-	"github.com/allenbiji/clone-sage/internal/engine"
+	"github.com/allenbiji/preboot/internal/config"
+	"github.com/allenbiji/preboot/internal/engine"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +12,7 @@ func NewCheckCmd() *cobra.Command {
 
 	checkCmd := &cobra.Command{
 		Use:   "check",
-		Short: "Check the sage.yml file for any errors",
+		Short: "Check the preboot.yml file for any errors",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.LoadFrom(cfgFile)
 			if err != nil {
@@ -23,7 +23,7 @@ func NewCheckCmd() *cobra.Command {
 		},
 	}
 
-	checkCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "Path to custom sage.yml")
+	checkCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "Path to custom preboot.yml")
 	checkCmd.Flags().BoolVarP(&isQuickMode, "quick", "q", false, "Run only fast, low-cost checks")
 
 	return checkCmd

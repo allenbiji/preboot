@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/allenbiji/clone-sage/internal/model"
-	"github.com/allenbiji/clone-sage/internal/registry"
+	"github.com/allenbiji/preboot/internal/model"
+	"github.com/allenbiji/preboot/internal/registry"
 )
 
 // validateSeverity ensures the string cast by Viper matches our strict enums.
@@ -28,7 +28,7 @@ func validateCheckTypes(check model.CheckConfig) error {
 
 // ValidateConfig acts as the runtime firewall, ensuring the unmarshaled YAML data
 // strictly conforms to our domain types and business rules.
-func ValidateConfig(cfg *model.ClonesageConfig) error {
+func ValidateConfig(cfg *model.PrebootConfig) error {
 	var errs []string
 
 	if cfg.Version != 1 {

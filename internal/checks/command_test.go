@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/allenbiji/clone-sage/internal/checks"
-	"github.com/allenbiji/clone-sage/internal/model"
-	"github.com/allenbiji/clone-sage/internal/registry"
+	"github.com/allenbiji/preboot/internal/checks"
+	"github.com/allenbiji/preboot/internal/model"
+	"github.com/allenbiji/preboot/internal/registry"
 )
 
 func TestBuildCommandExistsCheck(t *testing.T) {

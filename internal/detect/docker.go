@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

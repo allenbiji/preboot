@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	_ "github.com/allenbiji/clone-sage/internal/checks" // register all check types via init()
-	"github.com/allenbiji/clone-sage/internal/engine"
-	"github.com/allenbiji/clone-sage/internal/model"
+	_ "github.com/allenbiji/preboot/internal/checks" // register all check types via init()
+	"github.com/allenbiji/preboot/internal/engine"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 func passCfg(name string, sev model.Severity) model.CheckConfig {
@@ -28,14 +28,14 @@ func failCfg(name string, sev model.Severity) model.CheckConfig {
 }
 
 func TestRun_EmptyChecks(t *testing.T) {
-	cfg := &model.ClonesageConfig{Version: 1}
+	cfg := &model.PrebootConfig{Version: 1}
 	if err := engine.Run(cfg, false); err != nil {
 		t.Errorf("expected nil for empty checks, got %v", err)
 	}
 }
 
 func TestRun_AllPass(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks:  []model.CheckConfig{passCfg("go-installed", model.SeverityBlocker)},
 	}
@@ -45,7 +45,7 @@ func TestRun_AllPass(t *testing.T) {
 }
 
 func TestRun_BlockerFails(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks:  []model.CheckConfig{failCfg("missing-cmd", model.SeverityBlocker)},
 	}
@@ -56,7 +56,7 @@ func TestRun_BlockerFails(t *testing.T) {
 }
 
 func TestRun_WarningNonStrict(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version:  1,
 		Defaults: map[string]interface{}{"strict": false},
 		Checks:   []model.CheckConfig{failCfg("warn-check", model.SeverityWarning)},
@@ -67,7 +67,7 @@ func TestRun_WarningNonStrict(t *testing.T) {
 }
 
 func TestRun_WarningStrictMode(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version:  1,
 		Defaults: map[string]interface{}{"strict": true},
 		Checks:   []model.CheckConfig{failCfg("warn-check", model.SeverityWarning)},
@@ -79,7 +79,7 @@ func TestRun_WarningStrictMode(t *testing.T) {
 }
 
 func TestRun_InfoNeverBlocks(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks:  []model.CheckConfig{failCfg("info-check", model.SeverityInfo)},
 	}
@@ -89,7 +89,7 @@ func TestRun_InfoNeverBlocks(t *testing.T) {
 }
 
 func TestRun_UnknownCheckType(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks: []model.CheckConfig{
 			{Name: "bad-type", Type: model.CheckType("unknown_xyz"), Severity: model.SeverityBlocker},
@@ -102,7 +102,7 @@ func TestRun_UnknownCheckType(t *testing.T) {
 }
 
 func TestRun_QuickModeSkipsHttp(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks: []model.CheckConfig{
 			{
@@ -120,7 +120,7 @@ func TestRun_QuickModeSkipsHttp(t *testing.T) {
 }
 
 func TestRun_QuickModeSkipsTcp(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version: 1,
 		Checks: []model.CheckConfig{
 			{
@@ -140,7 +140,7 @@ func TestRun_GlobalTimeoutInjected(t *testing.T) {
 	// Use a real check with a very short injected timeout — if timeout is NOT injected
 	// the check uses the 5s default and passes normally. Either way the injection path
 	// is exercised. We verify via a pass (no panic, no crash) and that quick=false runs it.
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version:  1,
 		Defaults: map[string]interface{}{"timeout_ms": "5000"},
 		Checks:   []model.CheckConfig{passCfg("go-installed", model.SeverityBlocker)},
@@ -151,7 +151,7 @@ func TestRun_GlobalTimeoutInjected(t *testing.T) {
 }
 
 func TestRun_OwnTimeoutNotOverridden(t *testing.T) {
-	cfg := &model.ClonesageConfig{
+	cfg := &model.PrebootConfig{
 		Version:  1,
 		Defaults: map[string]interface{}{"timeout_ms": "9999"},
 		Checks: []model.CheckConfig{

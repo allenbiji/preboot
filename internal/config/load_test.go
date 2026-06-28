@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	_ "github.com/allenbiji/clone-sage/internal/checks" // register check types for ValidateConfig
+	_ "github.com/allenbiji/preboot/internal/checks" // register check types for ValidateConfig
 )
 
 func chdir(t *testing.T, dir string) {
@@ -31,7 +31,7 @@ checks:
 `
 
 func TestLoadFrom_PathNotFound(t *testing.T) {
-	_, err := LoadFrom("/nonexistent/path/sage.yml")
+	_, err := LoadFrom("/nonexistent/path/preboot.yml")
 	if err == nil {
 		t.Fatal("expected error for missing file, got nil")
 	}
@@ -51,7 +51,7 @@ func TestLoadFrom_InvalidYAML(t *testing.T) {
 
 func TestLoadFrom_ValidConfig(t *testing.T) {
 	tmp := t.TempDir()
-	f := filepath.Join(tmp, "sage.yml")
+	f := filepath.Join(tmp, "preboot.yml")
 	if err := os.WriteFile(f, []byte(validYAML), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestLoad_NeitherFile(t *testing.T) {
 func TestLoad_OnlySageYml(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
-	if err := os.WriteFile(filepath.Join(dir, "sage.yml"), []byte(validYAML), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot.yml"), []byte(validYAML), 0644); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err := Load()
@@ -108,7 +108,7 @@ func TestLoad_OnlySageYml(t *testing.T) {
 func TestLoad_OnlySageAutoYml(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
-	if err := os.WriteFile(filepath.Join(dir, "sage-auto.yml"), []byte(validYAML), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot-auto.yml"), []byte(validYAML), 0644); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err := Load()
@@ -139,10 +139,10 @@ checks:
     options:
       command: go
 `
-	if err := os.WriteFile(filepath.Join(dir, "sage-auto.yml"), []byte(autoYAML), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot-auto.yml"), []byte(autoYAML), 0644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "sage.yml"), []byte(explicitYAML), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot.yml"), []byte(explicitYAML), 0644); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err := Load()
@@ -157,24 +157,24 @@ checks:
 func TestLoad_AutoParseError_SageMissing(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
-	if err := os.WriteFile(filepath.Join(dir, "sage-auto.yml"), []byte(":::bad yaml:::\n"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot-auto.yml"), []byte(":::bad yaml:::\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Load()
 	if err == nil {
-		t.Fatal("expected error when sage-auto.yml fails to parse, got nil")
+		t.Fatal("expected error when preboot-auto.yml fails to parse, got nil")
 	}
 }
 
 func TestLoad_SageParseError_AutoMissing(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
-	if err := os.WriteFile(filepath.Join(dir, "sage.yml"), []byte(":::bad yaml:::\n"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot.yml"), []byte(":::bad yaml:::\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Load()
 	if err == nil {
-		t.Fatal("expected error when sage.yml fails to parse, got nil")
+		t.Fatal("expected error when preboot.yml fails to parse, got nil")
 	}
 }
 
@@ -189,7 +189,7 @@ checks:
     options:
       command: go
 `
-	if err := os.WriteFile(filepath.Join(dir, "sage.yml"), []byte(bad), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "preboot.yml"), []byte(bad), 0644); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Load()

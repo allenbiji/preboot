@@ -5,8 +5,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/allenbiji/clone-sage/internal/model"
-	"github.com/allenbiji/clone-sage/internal/registry"
+	"github.com/allenbiji/preboot/internal/model"
+	"github.com/allenbiji/preboot/internal/registry"
 )
 
 type CommandCheck struct {

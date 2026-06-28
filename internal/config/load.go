@@ -6,17 +6,17 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 	"github.com/spf13/viper"
 )
 
-func Load() (*model.ClonesageConfig, error) {
-	autoCfg, errAuto := readConfigFile("sage-auto.yml")
+func Load() (*model.PrebootConfig, error) {
+	autoCfg, errAuto := readConfigFile("preboot-auto.yml")
 
-	explicitCfg, errExplicit := readConfigFile("sage.yml")
+	explicitCfg, errExplicit := readConfigFile("preboot.yml")
 
 	if errors.Is(errAuto, fs.ErrNotExist) && errors.Is(errExplicit, fs.ErrNotExist) {
-		return nil, fmt.Errorf("No config files found. Run 'sage init' to generate config files")
+		return nil, fmt.Errorf("No config files found. Run 'preboot init' to generate config files")
 	}
 
 	if errAuto != nil && !errors.Is(errAuto, fs.ErrNotExist) {
@@ -26,15 +26,15 @@ func Load() (*model.ClonesageConfig, error) {
 		return nil, errExplicit
 	}
 
-	var finalCfg *model.ClonesageConfig
+	var finalCfg *model.PrebootConfig
 	if explicitCfg == nil {
-		fmt.Fprintln(os.Stderr, "Using auto-generated config (no sage.yml found).")
+		fmt.Fprintln(os.Stderr, "Using auto-generated config (no preboot.yml found).")
 		finalCfg = autoCfg
 	} else if autoCfg == nil {
-		fmt.Fprintln(os.Stderr, "Using explicit config (no sage-auto.yml found).")
+		fmt.Fprintln(os.Stderr, "Using explicit config (no preboot-auto.yml found).")
 		finalCfg = explicitCfg
 	} else {
-		fmt.Fprintln(os.Stderr, "Merging sage-auto.yml with sage.yml...")
+		fmt.Fprintln(os.Stderr, "Merging preboot-auto.yml with preboot.yml...")
 		finalCfg = mergeConfigs(autoCfg, explicitCfg)
 	}
 
@@ -49,7 +49,7 @@ func Load() (*model.ClonesageConfig, error) {
 
 // LoadFrom loads a single named config file when --config is specified.
 // When customPath is empty it falls back to the standard two-file merge via Load.
-func LoadFrom(customPath string) (*model.ClonesageConfig, error) {
+func LoadFrom(customPath string) (*model.PrebootConfig, error) {
 	if customPath != "" {
 		cfg, err := readConfigFile(customPath)
 		if err != nil {
@@ -64,8 +64,8 @@ func LoadFrom(customPath string) (*model.ClonesageConfig, error) {
 	return Load()
 }
 
-// this function is used to unmarshal the given file into a clonesageconfig struct
-func readConfigFile(filename string) (*model.ClonesageConfig, error) {
+// this function is used to unmarshal the given file into a prebootconfig struct
+func readConfigFile(filename string) (*model.PrebootConfig, error) {
 	v := viper.New()
 
 	if _, err := os.Stat(filename); err != nil {
@@ -78,7 +78,7 @@ func readConfigFile(filename string) (*model.ClonesageConfig, error) {
 		return nil, fmt.Errorf("Error reading config file: %w", err)
 	}
 
-	var cfg model.ClonesageConfig
+	var cfg model.PrebootConfig
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("There was an error while unmarshalling: %w", err)
 	}
@@ -87,8 +87,8 @@ func readConfigFile(filename string) (*model.ClonesageConfig, error) {
 }
 
 // mergeConfigs safely layers the explicit config over the auto config
-func mergeConfigs(auto, explicit *model.ClonesageConfig) *model.ClonesageConfig {
-	merged := &model.ClonesageConfig{
+func mergeConfigs(auto, explicit *model.PrebootConfig) *model.PrebootConfig {
+	merged := &model.PrebootConfig{
 		Version: explicit.Version,
 		Defaults: make(map[string]interface{}),
 	}

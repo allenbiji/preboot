@@ -1,7 +1,7 @@
 package detect
 
 import (
-	"github.com/allenbiji/clone-sage/internal/model"
+	"github.com/allenbiji/preboot/internal/model"
 )
 
 func detectGo() []model.CheckConfig {
