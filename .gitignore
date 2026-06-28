@@ -12,5 +12,5 @@ dist/
 # env
 .env
 
-# binary
-preboot
+# binary (root-level only, so cmd/preboot/ is not ignored)
+/preboot
