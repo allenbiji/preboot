@@ -16,4 +16,9 @@ func MergeDefaults(c *model.PrebootConfig) {
 		c.Defaults["timeout_ms"] = 3000
 	}
 
+	for i := range c.Checks {
+		if c.Checks[i].Severity == "" {
+			c.Checks[i].Severity = model.SeverityBlocker
+		}
+	}
 }

@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	_ "github.com/allenbiji/preboot/internal/checks" // register all check types via init()
@@ -147,6 +148,72 @@ func TestRun_GlobalTimeoutInjected(t *testing.T) {
 	}
 	if err := engine.Run(cfg, false); err != nil {
 		t.Errorf("global timeout injection should not break passing check: %v", err)
+	}
+}
+
+// exit matrix: blocker + warning + info all failing — ErrCheckFailed propagates.
+func TestRun_MixedSeverityFailures(t *testing.T) {
+	cfg := &model.PrebootConfig{
+		Version: 1,
+		Defaults: map[string]interface{}{"strict": true},
+		Checks: []model.CheckConfig{
+			failCfg("fail-blocker", model.SeverityBlocker),
+			failCfg("fail-warning", model.SeverityWarning),
+			failCfg("fail-info", model.SeverityInfo),
+		},
+	}
+	err := engine.Run(cfg, false)
+	if !errors.Is(err, engine.ErrCheckFailed) {
+		t.Errorf("expected ErrCheckFailed with mixed severity failures, got %v", err)
+	}
+}
+
+// s55: 600-character check name — Run() completes without panic or truncation error.
+func TestRun_LongCheckName(t *testing.T) {
+	longName := make([]byte, 600)
+	for i := range longName {
+		longName[i] = 'a'
+	}
+	cfg := &model.PrebootConfig{
+		Version: 1,
+		Checks:  []model.CheckConfig{failCfg(string(longName), model.SeverityInfo)},
+	}
+	// Info severity never blocks; we just want no panic.
+	if err := engine.Run(cfg, false); err != nil {
+		t.Errorf("long check name should not cause an error (info severity): %v", err)
+	}
+}
+
+// s69: 60 passing checks — Run() handles a large check count without crashing.
+func TestRun_LargeCheckCount(t *testing.T) {
+	checks := make([]model.CheckConfig, 60)
+	for i := range checks {
+		checks[i] = passCfg(fmt.Sprintf("check-%d", i), model.SeverityBlocker)
+	}
+	cfg := &model.PrebootConfig{Version: 1, Checks: checks}
+	if err := engine.Run(cfg, false); err != nil {
+		t.Errorf("expected nil for 60 passing checks, got %v", err)
+	}
+}
+
+// s70: concurrent invocations — 10 goroutines each run their own config; no data race.
+// Run with: go test -race ./internal/engine/...
+func TestRun_ConcurrentInvocations(t *testing.T) {
+	const n = 10
+	errs := make(chan error, n)
+	for i := 0; i < n; i++ {
+		go func() {
+			cfg := &model.PrebootConfig{
+				Version: 1,
+				Checks:  []model.CheckConfig{passCfg("go-installed", model.SeverityBlocker)},
+			}
+			errs <- engine.Run(cfg, false)
+		}()
+	}
+	for i := 0; i < n; i++ {
+		if err := <-errs; err != nil {
+			t.Errorf("goroutine %d: unexpected error: %v", i, err)
+		}
 	}
 }
 

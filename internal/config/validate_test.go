@@ -58,6 +58,19 @@ func TestValidateConfig(t *testing.T) {
 			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Type = "does_not_exist" },
 			wantErr: "unknown check type",
 		},
+		// s40: blank type field (omitted or empty string) — treated as unknown type.
+		{
+			name:    "blank type",
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Type = "" },
+			wantErr: "unknown check type",
+		},
+		// s56: blank severity — ValidateConfig rejects it directly; MergeDefaults provides
+		// the default in the production Load() flow before ValidateConfig is called.
+		{
+			name:    "blank severity",
+			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Severity = "" },
+			wantErr: "Invalid severity",
+		},
 		{
 			name: "multiple errors accumulated",
 			mutate: func(c *model.PrebootConfig) {

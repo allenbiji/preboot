@@ -58,3 +58,16 @@ func TestCommandCheck_Execute(t *testing.T) {
 		})
 	}
 }
+
+// s13/s59: binary not in PATH because PATH is stripped — must fail gracefully, no panic.
+func TestCommandCheck_Execute_StrippedPath(t *testing.T) {
+	t.Setenv("PATH", "")
+	check := &checks.CommandCheck{Command: "go"}
+	err := check.Execute()
+	if err == nil {
+		t.Fatal("expected error when PATH is empty, got nil")
+	}
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("error %q does not contain 'not found'", err.Error())
+	}
+}

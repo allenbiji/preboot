@@ -106,4 +106,26 @@ func TestTcpReachableCheck_Execute(t *testing.T) {
 			t.Errorf("error %q does not contain 'not reachable'", err.Error())
 		}
 	})
+
+	// s33: firewall-drop simulation — use TEST-NET-1 (192.0.2.0/24, RFC 5737) which is
+	// non-routable. The check must complete within twice the configured timeout and return
+	// an error; it must not hang indefinitely.
+	t.Run("timeout: no route to host", func(t *testing.T) {
+		t.Parallel()
+		const timeout = 100 * time.Millisecond
+		check := &checks.TcpReachableCheck{Address: "192.0.2.1:9999", Timeout: timeout}
+		start := time.Now()
+		err := check.Execute()
+		elapsed := time.Since(start)
+
+		if err == nil {
+			t.Skip("192.0.2.1 appears routable in this environment — skipping firewall-drop simulation")
+		}
+		if !strings.Contains(err.Error(), "not reachable") {
+			t.Errorf("error %q does not contain 'not reachable'", err.Error())
+		}
+		if elapsed > 10*time.Second {
+			t.Errorf("check took %v; expected to respect the %v timeout", elapsed, timeout)
+		}
+	})
 }

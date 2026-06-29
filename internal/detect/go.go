@@ -7,7 +7,7 @@ import (
 func detectGo() []model.CheckConfig {
 	var checks []model.CheckConfig
 
-	if fileExists("go.mod") {
+	if fileExists("go.mod") || fileExists("go.work") {
 		checks = append(checks, model.CheckConfig{
 			Name:     "go-installed",
 			Type:     model.TypeCommandExists,

@@ -89,7 +89,7 @@ func readConfigFile(filename string) (*model.PrebootConfig, error) {
 // mergeConfigs safely layers the explicit config over the auto config
 func mergeConfigs(auto, explicit *model.PrebootConfig) *model.PrebootConfig {
 	merged := &model.PrebootConfig{
-		Version: explicit.Version,
+		Version:  explicit.Version,
 		Defaults: make(map[string]interface{}),
 	}
 	if merged.Version == 0 {

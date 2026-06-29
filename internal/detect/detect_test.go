@@ -188,3 +188,76 @@ func TestScanRepo_WithMakefile(t *testing.T) {
 		t.Error("expected make-installed check for Makefile project")
 	}
 }
+
+// s05: all recognised artifacts present — ScanRepo emits go-installed, make-installed,
+// docker-installed, a port-free check, and an env key check; no duplicate Name values.
+func TestScanRepo_AllArtifacts(t *testing.T) {
+	dir := t.TempDir()
+	chdir(t, dir)
+
+	files := map[string]string{
+		"go.mod":            "module example\ngo 1.21\n",
+		"Makefile":          "build:\n\tgo build\n",
+		"docker-compose.yml": "services:\n  app:\n    ports:\n      - \"8080:8080\"\n",
+		".env.example":      "SECRET_KEY=\n",
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cfg := ScanRepo()
+
+	want := map[string]bool{
+		"go-installed":     false,
+		"make-installed":   false,
+		"docker-installed": false,
+		"port-free-8080":   false,
+	}
+	names := make(map[string]int)
+	for _, c := range cfg.Checks {
+		names[c.Name]++
+		if _, ok := want[c.Name]; ok {
+			want[c.Name] = true
+		}
+	}
+
+	for name, found := range want {
+		if !found {
+			t.Errorf("expected check %q in ScanRepo output", name)
+		}
+	}
+	for name, count := range names {
+		if count > 1 {
+			t.Errorf("duplicate check name %q (appears %d times)", name, count)
+		}
+	}
+
+	// Verify at least one env key check exists (key=SECRET_KEY).
+	hasEnvKey := false
+	for _, c := range cfg.Checks {
+		if c.Options["key"] == "SECRET_KEY" {
+			hasEnvKey = true
+		}
+	}
+	if !hasEnvKey {
+		t.Error("expected env key check for SECRET_KEY from .env.example")
+	}
+}
+
+// s10: go.work present without go.mod — detectGo() emits go-installed check.
+func TestDetectGo_GoWorkPresent(t *testing.T) {
+	dir := t.TempDir()
+	chdir(t, dir)
+	if err := os.WriteFile(filepath.Join(dir, "go.work"), []byte("go 1.21\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	got := detectGo()
+	if len(got) == 0 {
+		t.Fatal("expected go-installed check when go.work is present, got none")
+	}
+	if got[0].Type != model.TypeCommandExists || got[0].Options["command"] != "go" {
+		t.Errorf("expected go command check, got %+v", got[0])
+	}
+}

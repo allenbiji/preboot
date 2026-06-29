@@ -13,7 +13,7 @@ type CommandCheck struct {
 	Command string
 }
 
-//execute method for the command_exists check
+// execute method for the command_exists check
 func (c *CommandCheck) Execute() error {
 	_, err := exec.LookPath(c.Command)
 	if err != nil {
@@ -23,8 +23,8 @@ func (c *CommandCheck) Execute() error {
 	return nil
 }
 
-//builds command exists factory
-func buildCommandExistsCheck(cfg model.CheckConfig) (registry.Check, error){
+// builds command exists factory
+func buildCommandExistsCheck(cfg model.CheckConfig) (registry.Check, error) {
 	cmd, ok := cfg.Options["command"]
 	if !ok || cmd == "" {
 		return nil, fmt.Errorf("command_exists check requires a 'Command' option")
@@ -38,7 +38,7 @@ func buildCommandExistsCheck(cfg model.CheckConfig) (registry.Check, error){
 	}, nil
 }
 
-//register check to registry
+// register check to registry
 func init() {
 	registry.Register(model.TypeCommandExists, buildCommandExistsCheck)
 }

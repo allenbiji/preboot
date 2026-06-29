@@ -12,6 +12,23 @@ import (
 	"github.com/allenbiji/preboot/internal/registry"
 )
 
+// s30: self-signed TLS cert — standard http.Client rejects it, check fails.
+func TestHttpReachableCheck_SelfSignedCert(t *testing.T) {
+	t.Parallel()
+	s := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer s.Close()
+	check := &checks.HttpReachableCheck{Address: s.URL, Timeout: 5 * time.Second}
+	err := check.Execute()
+	if err == nil {
+		t.Fatal("expected TLS error for self-signed cert, got nil")
+	}
+	if !strings.Contains(err.Error(), "not reachable") {
+		t.Errorf("error %q does not contain 'not reachable'", err.Error())
+	}
+}
+
 func TestBuildHttpReachableCheck(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -96,7 +113,7 @@ func TestHttpReachableCheck_Execute(t *testing.T) {
 	tests := []struct {
 		name    string
 		handler http.HandlerFunc
-		addr    string        // overrides server URL when set
+		addr    string // overrides server URL when set
 		timeout time.Duration
 		wantErr string
 	}{
@@ -135,6 +152,24 @@ func TestHttpReachableCheck_Execute(t *testing.T) {
 				time.Sleep(200 * time.Millisecond)
 			},
 			timeout: 10 * time.Millisecond,
+			wantErr: "not reachable",
+		},
+		// s27: other 2xx codes besides 200 must pass
+		{
+			name:    "201 Created",
+			handler: func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusCreated) },
+			timeout: 5 * time.Second,
+		},
+		{
+			name:    "204 No Content",
+			handler: func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) },
+			timeout: 5 * time.Second,
+		},
+		// s61: DNS resolution failure — .invalid TLD never resolves (RFC 2606)
+		{
+			name:    "DNS resolution failure",
+			addr:    "http://preboot-no-such-host.invalid:8080/",
+			timeout: 5 * time.Second,
 			wantErr: "not reachable",
 		},
 	}

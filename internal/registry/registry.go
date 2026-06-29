@@ -7,7 +7,7 @@ import (
 )
 
 // Check is the strict contract that every single diagnostic test must follow.
-type Check interface{
+type Check interface {
 	Execute() error
 }
 
@@ -15,11 +15,11 @@ type Check interface{
 type Factory func(cfg model.CheckConfig) (Check, error)
 
 // backend is the private, centralized map of all known check types.
-var backend = make(map[model.CheckType] Factory)
+var backend = make(map[model.CheckType]Factory)
 
 // Register is called by individual checks during application startup.
-func Register(checkType model.CheckType, factory Factory){
-	if _,exists := backend[checkType]; exists {
+func Register(checkType model.CheckType, factory Factory) {
+	if _, exists := backend[checkType]; exists {
 		panic(fmt.Sprintf("Check type %s is already registered", checkType))
 	}
 

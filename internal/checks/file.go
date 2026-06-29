@@ -14,10 +14,10 @@ type FileCheck struct {
 	Path string
 }
 
-//execute method for file check
+// execute method for file check
 func (f *FileCheck) Execute() error {
 	info, err := os.Stat(f.Path)
-	if os.IsNotExist(err){
+	if os.IsNotExist(err) {
 		return fmt.Errorf("File does not exist: %s", f.Path)
 	}
 
@@ -25,7 +25,7 @@ func (f *FileCheck) Execute() error {
 		return fmt.Errorf("Error accessing file %s: %w", f.Path, err)
 	}
 
-	if info.IsDir(){
+	if info.IsDir() {
 		return fmt.Errorf("Expected a file, returned a directory at %s", f.Path)
 	}
 
@@ -47,7 +47,7 @@ func validateRelativePath(path, field string) error {
 	return nil
 }
 
-//creates file check factory
+// creates file check factory
 func buildFileCheck(cfg model.CheckConfig) (registry.Check, error) {
 	path, ok := cfg.Options["path"]
 	if !ok || path == "" {
@@ -61,7 +61,7 @@ func buildFileCheck(cfg model.CheckConfig) (registry.Check, error) {
 	}, nil
 }
 
-//Registers file exists check in registry
-func init(){
+// Registers file exists check in registry
+func init() {
 	registry.Register(model.TypeFileExists, buildFileCheck)
 }

@@ -34,6 +34,20 @@ func TestEnvCheck_Execute(t *testing.T) {
 			key:     "DB",
 			wantErr: "has no value",
 		},
+		// s18a: values with '#' are truncated at the '#' by the .env parser — document the behavior.
+		// The EnvCheck itself sees the already-parsed (truncated) value, so the check passes
+		// as long as the portion before '#' is non-empty.
+		{
+			name:   "value truncated at hash is non-empty",
+			envMap: map[string]string{"KEY": "abc"},
+			key:    "KEY",
+		},
+		// s18b: shell metacharacters other than '#' are preserved verbatim — no crash.
+		{
+			name:   "value with shell metacharacters preserved",
+			envMap: map[string]string{"GOFLAGS": "-mod=vendor -v"},
+			key:    "GOFLAGS",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

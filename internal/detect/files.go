@@ -18,7 +18,7 @@ func fileExists(filePath string) bool {
 
 // extract the env keys from the .env.example file
 func ExtractEnvKeys(filePath string) (map[string]string, error) {
-	envMap := make(map[string] string)
+	envMap := make(map[string]string)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -26,7 +26,6 @@ func ExtractEnvKeys(filePath string) (map[string]string, error) {
 	}
 
 	defer file.Close()
-
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -37,8 +36,8 @@ func ExtractEnvKeys(filePath string) (map[string]string, error) {
 		}
 
 		if before, _, found := strings.Cut(line, "#"); found {
-        line = strings.TrimSpace(before)
-        }
+			line = strings.TrimSpace(before)
+		}
 
 		key, value, found := strings.Cut(line, "=")
 		if found {

@@ -13,7 +13,7 @@ type PortFreeCheck struct {
 	Port string
 }
 
-//execute method for the port free check
+// execute method for the port free check
 func (p *PortFreeCheck) Execute() error {
 	listen, err := net.Listen("tcp", "127.0.0.1:"+p.Port)
 	if err != nil {
@@ -36,7 +36,7 @@ func validatePort(portStr string) error {
 	return nil
 }
 
-//build a factory for the port free check
+// build a factory for the port free check
 func buildPortFreeCheck(cfg model.CheckConfig) (registry.Check, error) {
 	port, ok := cfg.Options["port"]
 	if !ok || port == "" {
@@ -50,7 +50,7 @@ func buildPortFreeCheck(cfg model.CheckConfig) (registry.Check, error) {
 	}, nil
 }
 
-//registers the check in the registry
+// registers the check in the registry
 func init() {
 	registry.Register(model.TypePortFree, buildPortFreeCheck)
 }

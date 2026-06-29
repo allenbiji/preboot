@@ -2,6 +2,7 @@ package checks_test
 
 import (
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -73,6 +74,23 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 		check := &checks.PortFreeCheck{Port: port}
 		if err := check.Execute(); err != nil {
 			t.Errorf("expected nil for free port, got: %v", err)
+		}
+	})
+
+	// s36: privileged port (<1024) as non-root — net.Listen fails with a permission error,
+	// which the check surfaces as "not free". Skip when running as root.
+	t.Run("privileged port as non-root", func(t *testing.T) {
+		t.Parallel()
+		if os.Getuid() == 0 {
+			t.Skip("running as root — privileged port test skipped")
+		}
+		check := &checks.PortFreeCheck{Port: "80"}
+		err := check.Execute()
+		if err == nil {
+			t.Fatal("expected error for privileged port as non-root, got nil")
+		}
+		if !strings.Contains(err.Error(), "not free") {
+			t.Errorf("error %q does not contain 'not free'", err.Error())
 		}
 	})
 }

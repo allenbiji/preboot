@@ -46,6 +46,38 @@ func TestFileCheck_Execute(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// s21: symlink pointing to an existing file (os.Stat follows symlinks)
+	symlinkPath := filepath.Join(dir, "link.txt")
+	if err := os.Symlink(existingFile, symlinkPath); err != nil {
+		t.Fatal(err)
+	}
+
+	// s22: broken symlink whose target does not exist
+	brokenLink := filepath.Join(dir, "broken.txt")
+	if err := os.Symlink(filepath.Join(dir, "nonexistent.txt"), brokenLink); err != nil {
+		t.Fatal(err)
+	}
+
+	// s65: file inside a directory whose name contains spaces
+	spaceDir := filepath.Join(dir, "my project")
+	if err := os.MkdirAll(spaceDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	spaceFile := filepath.Join(spaceDir, "config.txt")
+	if err := os.WriteFile(spaceFile, []byte("x"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// s66: file inside a directory whose name contains unicode characters
+	unicodeDir := filepath.Join(dir, "тест")
+	if err := os.MkdirAll(unicodeDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	unicodeFile := filepath.Join(unicodeDir, "file.txt")
+	if err := os.WriteFile(unicodeFile, []byte("x"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name    string
 		path    string
@@ -54,6 +86,10 @@ func TestFileCheck_Execute(t *testing.T) {
 		{"file exists", existingFile, ""},
 		{"file missing", filepath.Join(dir, "missing.txt"), "does not exist"},
 		{"path is directory", dir, "directory"},
+		{"symlink to existing file", symlinkPath, ""},
+		{"broken symlink", brokenLink, "does not exist"},
+		{"path with spaces", spaceFile, ""},
+		{"path with unicode", unicodeFile, ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

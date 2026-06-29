@@ -13,8 +13,8 @@ type DirectoryCheck struct {
 	Folder string
 }
 
-//execute method for the check
-func (d* DirectoryCheck) Execute() error {
+// execute method for the check
+func (d *DirectoryCheck) Execute() error {
 	info, err := os.Stat(d.Folder)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("The folder %s does not exist", d.Folder)
@@ -30,8 +30,8 @@ func (d* DirectoryCheck) Execute() error {
 	return nil
 }
 
-//build factory for the check
-func buildDirectoryExistsCheck(cfg model.CheckConfig) (registry.Check, error){
+// build factory for the check
+func buildDirectoryExistsCheck(cfg model.CheckConfig) (registry.Check, error) {
 	folder, ok := cfg.Options["folder"]
 	if !ok || folder == "" {
 		return nil, fmt.Errorf("directory_exists check requires a 'folder' option")
@@ -44,7 +44,7 @@ func buildDirectoryExistsCheck(cfg model.CheckConfig) (registry.Check, error){
 	}, nil
 }
 
-//register check in registry
+// register check in registry
 func init() {
 	registry.Register(model.TypeDirectoryExists, buildDirectoryExistsCheck)
 }
