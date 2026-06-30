@@ -1,15 +1,20 @@
 package engine
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/allenbiji/preboot/internal/model"
 	"github.com/allenbiji/preboot/internal/registry"
 )
 
-// ANSI Color Codes for terminal output
+// ANSI color codes used by renderText.
 const (
 	Reset    = "\033[0m"
 	Red      = "\033[31m"
@@ -23,21 +28,56 @@ const (
 // Callers use errors.Is to distinguish this from unexpected internal errors.
 var ErrCheckFailed = errors.New("one or more blocker checks failed")
 
-// Run executes the diagnostics. It returns nil if the environment is healthy,
-// or ErrCheckFailed if a blocker check failed.
-func Run(cfg *model.PrebootConfig, quickMode bool) error {
-	fmt.Fprintln(os.Stderr, colorize(Cyan, "Running Preboot Diagnostics..."))
-	fmt.Println()
+// RunOptions controls Run behaviour. Zero value runs in text mode writing to
+// os.Stdout/os.Stderr with no quick-mode filtering.
+type RunOptions struct {
+	// QuickMode skips network checks (http_reachable, tcp_reachable).
+	QuickMode bool
+	// Format is "text" (default) or "json". Any other value is treated as "text".
+	Format string
+	// Stdout receives the report (check results + summary in text mode; JSON object in json mode).
+	// Defaults to os.Stdout when nil.
+	Stdout io.Writer
+	// Stderr receives progress lines ("Running Preboot Diagnostics...") and warnings.
+	// Defaults to os.Stderr when nil.
+	Stderr io.Writer
+	// Ctx is the parent context. When nil, Run creates one wired to SIGINT/SIGTERM so
+	// Ctrl-C cancels in-flight HTTP/TCP checks cleanly.
+	Ctx context.Context
+}
 
-	hasBlockerFailed := false
-	passedCount := 0
-	failedCount := 0
+// Run executes all configured checks and renders a report.
+// It returns nil when the environment is healthy, or ErrCheckFailed when any
+// blocker (or warning in strict mode) fails.
+func Run(cfg *model.PrebootConfig, opts RunOptions) error {
+	if opts.Stdout == nil {
+		opts.Stdout = os.Stdout
+	}
+	if opts.Stderr == nil {
+		opts.Stderr = os.Stderr
+	}
 
-	// Loop through every check in the YAML
+	ctx := opts.Ctx
+	if ctx == nil {
+		var cancel context.CancelFunc
+		ctx, cancel = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer cancel()
+	}
+
+	if opts.Format != "json" {
+		fmt.Fprintln(opts.Stderr, colorize(Cyan, "Running Preboot Diagnostics..."))
+	}
+
+	report := RunReport{}
+
 	for _, checkCfg := range cfg.Checks {
-
-		// In quick mode, skip network checks that require a round-trip.
-		if quickMode && (checkCfg.Type == model.TypeHttpReachable || checkCfg.Type == model.TypeTcpReachable) {
+		if opts.QuickMode && (checkCfg.Type == model.TypeHttpReachable || checkCfg.Type == model.TypeTcpReachable) {
+			report.Checks = append(report.Checks, CheckResult{
+				Name:     checkCfg.Name,
+				Type:     string(checkCfg.Type),
+				Severity: string(checkCfg.Severity),
+				Status:   "skipped",
+			})
 			continue
 		}
 
@@ -54,63 +94,106 @@ func Run(cfg *model.PrebootConfig, quickMode bool) error {
 			}
 		}
 
-		// Ask the Registry to build the physical check
-		check, err := registry.Build(checkCfg)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s\n", colorize(Red, fmt.Sprintf("❌ %s [%s]: Internal Error - %v", checkCfg.Name, checkCfg.Type, err)))
-			hasBlockerFailed = true
-			failedCount++
+		check, buildErr := registry.Build(checkCfg)
+		if buildErr != nil {
+			report.Failed++
+			report.BlockerFailed = true
+			report.Checks = append(report.Checks, CheckResult{
+				Name:     checkCfg.Name,
+				Type:     string(checkCfg.Type),
+				Severity: string(checkCfg.Severity),
+				Status:   "fail",
+				Reason:   fmt.Sprintf("internal error: %v", buildErr),
+			})
 			continue
 		}
 
-		// Execute the check
-		err = check.Execute()
+		result := CheckResult{
+			Name:     checkCfg.Name,
+			Type:     string(checkCfg.Type),
+			Severity: string(checkCfg.Severity),
+			Message:  checkCfg.Message,
+			Fix:      checkCfg.Fix,
+		}
 
-		// Handle the Result
-		if err == nil {
-			fmt.Printf("%s\n", colorize(Green, "✅ "+checkCfg.Name))
-			passedCount++
+		execErr := check.Execute(ctx)
+		if execErr == nil {
+			result.Status = "pass"
+			report.Passed++
 		} else {
-			failedCount++
-
-			// Evaluate Severity
+			result.Status = "fail"
+			result.Reason = execErr.Error()
+			report.Failed++
 			switch checkCfg.Severity {
-			case model.SeverityInfo:
-				fmt.Printf("%s\n", colorize(Cyan, "ℹ️  "+checkCfg.Name+" (Info)"))
-				fmt.Printf("   Reason: %v\n", err)
 			case model.SeverityWarning:
-				fmt.Printf("%s\n", colorize(Yellow, "⚠️  "+checkCfg.Name+" (Warning)"))
-				fmt.Printf("   Reason: %v\n", err)
 				if strict, _ := cfg.Defaults["strict"].(bool); strict {
-					hasBlockerFailed = true
+					report.BlockerFailed = true
 				}
 			case model.SeverityBlocker:
-				fmt.Printf("%s\n", colorize(Red, "❌ "+checkCfg.Name+" (BLOCKER)"))
-				fmt.Printf("   Reason: %v\n", err)
-				if checkCfg.Message != "" {
-					fmt.Printf("   Message: %s\n", checkCfg.Message)
+				report.BlockerFailed = true
+			}
+		}
+
+		report.Checks = append(report.Checks, result)
+	}
+
+	if opts.Format == "json" {
+		renderJSON(opts.Stdout, report)
+	} else {
+		renderText(opts.Stdout, opts.Stderr, report)
+	}
+
+	if report.BlockerFailed {
+		return ErrCheckFailed
+	}
+	return nil
+}
+
+// renderText writes the human-readable report to stdout and any warnings to stderr.
+func renderText(stdout, stderr io.Writer, report RunReport) {
+	if report.Passed == 0 && report.Failed == 0 {
+		fmt.Fprintln(stderr, "warn: no checks were configured")
+	}
+
+	fmt.Fprintln(stdout)
+	for _, r := range report.Checks {
+		switch r.Status {
+		case "skipped":
+			continue
+		case "pass":
+			fmt.Fprintf(stdout, "%s\n", colorize(Green, "✅ "+r.Name))
+		case "fail":
+			switch model.Severity(r.Severity) {
+			case model.SeverityInfo:
+				fmt.Fprintf(stdout, "%s\n", colorize(Cyan, "ℹ️  "+r.Name+" (Info)"))
+				fmt.Fprintf(stdout, "   Reason: %s\n", r.Reason)
+			case model.SeverityWarning:
+				fmt.Fprintf(stdout, "%s\n", colorize(Yellow, "⚠️  "+r.Name+" (Warning)"))
+				fmt.Fprintf(stdout, "   Reason: %s\n", r.Reason)
+			case model.SeverityBlocker:
+				fmt.Fprintf(stdout, "%s\n", colorize(Red, "❌ "+r.Name+" (BLOCKER)"))
+				fmt.Fprintf(stdout, "   Reason: %s\n", r.Reason)
+				if r.Message != "" {
+					fmt.Fprintf(stdout, "   Message: %s\n", r.Message)
 				}
-				if checkCfg.Fix != "" {
-					fmt.Printf("   Fix: %s\n", checkCfg.Fix)
+				if r.Fix != "" {
+					fmt.Fprintf(stdout, "   Fix: %s\n", r.Fix)
 				}
-				hasBlockerFailed = true
 			}
 		}
 	}
 
-	if passedCount == 0 && failedCount == 0 {
-		fmt.Fprintln(os.Stderr, "warn: no checks were configured")
+	fmt.Fprintln(stdout, "----------------------------------------")
+	if report.BlockerFailed {
+		fmt.Fprintf(stdout, "%s\n", colorize(Red, fmt.Sprintf("❌ DIAGNOSTICS FAILED: %d passed, %d failed", report.Passed, report.Failed)))
+	} else {
+		fmt.Fprintf(stdout, "%s\n", colorize(Green, fmt.Sprintf("✅ DIAGNOSTICS PASSED: %d passed, %d failed (non-blocking)", report.Passed, report.Failed)))
 	}
+	fmt.Fprintln(stdout)
+}
 
-	// Print the Summary
-	fmt.Println("----------------------------------------")
-	if hasBlockerFailed {
-		fmt.Printf("%s\n", colorize(Red, fmt.Sprintf("❌ DIAGNOSTICS FAILED: %d passed, %d failed", passedCount, failedCount)))
-		fmt.Println()
-		return ErrCheckFailed
-	}
-
-	fmt.Printf("%s\n", colorize(Green, fmt.Sprintf("✅ DIAGNOSTICS PASSED: %d passed, %d failed (non-blocking)", passedCount, failedCount)))
-	fmt.Println()
-	return nil
+// renderJSON writes a single JSON object to stdout.
+func renderJSON(stdout io.Writer, report RunReport) {
+	data, _ := json.MarshalIndent(report, "", "  ")
+	fmt.Fprintf(stdout, "%s\n", data)
 }

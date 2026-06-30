@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,24 +14,20 @@ type DirectoryCheck struct {
 	Folder string
 }
 
-// execute method for the check
-func (d *DirectoryCheck) Execute() error {
+func (d *DirectoryCheck) Execute(_ context.Context) error {
 	info, err := os.Stat(d.Folder)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("The folder %s does not exist", d.Folder)
+		return fmt.Errorf("folder does not exist: %s", d.Folder)
 	}
 	if err != nil {
 		return fmt.Errorf("error accessing directory %s: %w", d.Folder, err)
 	}
-
 	if !info.IsDir() {
-		return fmt.Errorf("Expected a directory %s, but detected a file", d.Folder)
+		return fmt.Errorf("expected a directory but found a file: %s", d.Folder)
 	}
-
 	return nil
 }
 
-// build factory for the check
 func buildDirectoryExistsCheck(cfg model.CheckConfig) (registry.Check, error) {
 	folder, ok := cfg.Options["folder"]
 	if !ok || folder == "" {
@@ -39,12 +36,9 @@ func buildDirectoryExistsCheck(cfg model.CheckConfig) (registry.Check, error) {
 	if err := validateRelativePath(folder, "folder"); err != nil {
 		return nil, err
 	}
-	return &DirectoryCheck{
-		Folder: filepath.Clean(folder),
-	}, nil
+	return &DirectoryCheck{Folder: filepath.Clean(folder)}, nil
 }
 
-// register check in registry
 func init() {
 	registry.Register(model.TypeDirectoryExists, buildDirectoryExistsCheck)
 }

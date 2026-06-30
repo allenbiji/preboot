@@ -16,7 +16,7 @@ func Load() (*model.PrebootConfig, error) {
 	explicitCfg, errExplicit := readConfigFile("preboot.yml")
 
 	if errors.Is(errAuto, fs.ErrNotExist) && errors.Is(errExplicit, fs.ErrNotExist) {
-		return nil, fmt.Errorf("No config files found. Run 'preboot init' to generate config files")
+		return nil, fmt.Errorf("no config files found; run 'preboot init' to generate one")
 	}
 
 	if errAuto != nil && !errors.Is(errAuto, fs.ErrNotExist) {
@@ -75,12 +75,12 @@ func readConfigFile(filename string) (*model.PrebootConfig, error) {
 	v.SetConfigFile(filename)
 
 	if err := v.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("Error reading config file: %w", err)
+		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
 	var cfg model.PrebootConfig
 	if err := v.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("There was an error while unmarshalling: %w", err)
+		return nil, fmt.Errorf("unmarshalling config: %w", err)
 	}
 
 	return &cfg, nil

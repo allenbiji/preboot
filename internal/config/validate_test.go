@@ -31,12 +31,12 @@ func TestValidateConfig(t *testing.T) {
 		{
 			name:    "version 0",
 			mutate:  func(c *model.PrebootConfig) { c.Version = 0 },
-			wantErr: "Unsupported config version: 0",
+			wantErr: "unsupported config version: 0",
 		},
 		{
 			name:    "version 2",
 			mutate:  func(c *model.PrebootConfig) { c.Version = 2 },
-			wantErr: "Unsupported config version: 2",
+			wantErr: "unsupported config version: 2",
 		},
 		{
 			name:    "blank name",
@@ -51,7 +51,7 @@ func TestValidateConfig(t *testing.T) {
 		{
 			name:    "invalid severity",
 			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Severity = "critical" },
-			wantErr: "Invalid severity",
+			wantErr: "invalid severity",
 		},
 		{
 			name:    "unknown check type",
@@ -69,7 +69,7 @@ func TestValidateConfig(t *testing.T) {
 		{
 			name:    "blank severity",
 			mutate:  func(c *model.PrebootConfig) { c.Checks[0].Severity = "" },
-			wantErr: "Invalid severity",
+			wantErr: "invalid severity",
 		},
 		{
 			name: "multiple errors accumulated",
@@ -107,7 +107,7 @@ func TestValidateConfig_MultipleErrors(t *testing.T) {
 	if !strings.Contains(err.Error(), "name cannot be blank") {
 		t.Errorf("error %q missing 'name cannot be blank'", err.Error())
 	}
-	if !strings.Contains(err.Error(), "Invalid severity") {
-		t.Errorf("error %q missing 'Invalid severity'", err.Error())
+	if !strings.Contains(err.Error(), "invalid severity") {
+		t.Errorf("error %q missing 'invalid severity'", err.Error())
 	}
 }

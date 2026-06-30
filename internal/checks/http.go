@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,16 +18,25 @@ type HttpReachableCheck struct {
 	Timeout time.Duration
 }
 
-func (h *HttpReachableCheck) Execute() error {
+func (h *HttpReachableCheck) Execute(ctx context.Context) error {
 	client := &http.Client{
 		Timeout: h.Timeout,
+		// Do not follow redirects — a 3xx to an unexpected host would silently
+		// succeed otherwise. The status-code check below surfaces it correctly.
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
 	}
 
-	resp, err := client.Get(h.Address)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, h.Address, nil)
 	if err != nil {
 		return fmt.Errorf("http address %q is not reachable: %w", h.Address, err)
 	}
 
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("http address %q is not reachable: %w", h.Address, err)
+	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, resp.Body)
 		resp.Body.Close()
@@ -35,7 +45,6 @@ func (h *HttpReachableCheck) Execute() error {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("http address %q returned unhealthy status code: %d", h.Address, resp.StatusCode)
 	}
-
 	return nil
 }
 
@@ -69,10 +78,7 @@ func buildHttpReachableCheck(cfg model.CheckConfig) (registry.Check, error) {
 		}
 	}
 
-	return &HttpReachableCheck{
-		Address: address,
-		Timeout: timeout,
-	}, nil
+	return &HttpReachableCheck{Address: address, Timeout: timeout}, nil
 }
 
 func init() {

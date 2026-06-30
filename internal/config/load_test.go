@@ -68,14 +68,14 @@ func TestLoadFrom_ValidConfig(t *testing.T) {
 }
 
 func TestLoadFrom_EmptyPath_FallsBackToLoad(t *testing.T) {
-	// No config files in a fresh temp dir → Load() returns "No config files found"
+	// No config files in a fresh temp dir → Load() returns "no config files found"
 	chdir(t, t.TempDir())
 	_, err := LoadFrom("")
 	if err == nil {
 		t.Fatal("expected error when no config files present, got nil")
 	}
-	if !strings.Contains(err.Error(), "No config files found") {
-		t.Errorf("error %q does not contain 'No config files found'", err.Error())
+	if !strings.Contains(err.Error(), "no config files found") {
+		t.Errorf("error %q does not contain 'no config files found'", err.Error())
 	}
 }
 
@@ -85,8 +85,8 @@ func TestLoad_NeitherFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
-	if !strings.Contains(err.Error(), "No config files found") {
-		t.Errorf("error %q does not contain 'No config files found'", err.Error())
+	if !strings.Contains(err.Error(), "no config files found") {
+		t.Errorf("error %q does not contain 'no config files found'", err.Error())
 	}
 }
 
@@ -466,7 +466,7 @@ checks:
 	if err == nil {
 		t.Fatal("expected error for version 2, got nil")
 	}
-	if !strings.Contains(err.Error(), "Unsupported config version") {
-		t.Errorf("error %q does not contain 'Unsupported config version'", err.Error())
+	if !strings.Contains(err.Error(), "unsupported config version") {
+		t.Errorf("error %q does not contain 'unsupported config version'", err.Error())
 	}
 }

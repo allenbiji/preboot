@@ -28,6 +28,8 @@ func ExtractEnvKeys(filePath string) (map[string]string, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
+	// Raise token limit to 1 MiB so .env files with JWTs or long base64 values don't hit ErrTooLong.
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 

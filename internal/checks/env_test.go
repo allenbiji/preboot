@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -53,7 +54,7 @@ func TestEnvCheck_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			check := &EnvCheck{Key: tt.key, EnvMap: tt.envMap}
-			err := check.Execute()
+			err := check.Execute(context.Background())
 			if (err != nil) != (tt.wantErr != "") {
 				t.Fatalf("wantErr=%q got=%v", tt.wantErr, err)
 			}
@@ -119,7 +120,7 @@ func TestBuildEnvExistsCheck(t *testing.T) {
 		if check == nil {
 			t.Fatal("expected non-nil check")
 		}
-		if err := check.Execute(); err != nil {
+		if err := check.Execute(context.Background()); err != nil {
 			t.Errorf("Execute() error: %v", err)
 		}
 	})
@@ -172,7 +173,7 @@ func TestBuildEnvExistsCheck(t *testing.T) {
 		if err != nil {
 			t.Fatalf("second call error: %v", err)
 		}
-		if err := check2.Execute(); err != nil {
+		if err := check2.Execute(context.Background()); err != nil {
 			t.Errorf("second check Execute() error: %v", err)
 		}
 	})

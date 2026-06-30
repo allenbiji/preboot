@@ -14,7 +14,7 @@ func validateSeverity(check model.CheckConfig) error {
 	case model.SeverityInfo, model.SeverityBlocker, model.SeverityWarning:
 		return nil
 	default:
-		return fmt.Errorf("Invalid severity '%s' (allowed: info, warning, blocker)", check.Severity)
+		return fmt.Errorf("invalid severity %q (allowed: info, warning, blocker)", check.Severity)
 	}
 }
 
@@ -32,7 +32,21 @@ func ValidateConfig(cfg *model.PrebootConfig) error {
 	var errs []string
 
 	if cfg.Version != 1 {
-		errs = append(errs, fmt.Sprintf("Unsupported config version: %d", cfg.Version))
+		errs = append(errs, fmt.Sprintf("unsupported config version: %d", cfg.Version))
+	}
+
+	if v, exists := cfg.Defaults["strict"]; exists {
+		if _, ok := v.(bool); !ok {
+			errs = append(errs, fmt.Sprintf("defaults.strict must be a boolean, got %T", v))
+		}
+	}
+	if v, exists := cfg.Defaults["timeout_ms"]; exists {
+		switch v.(type) {
+		case int, int64, float64:
+			// ok
+		default:
+			errs = append(errs, fmt.Sprintf("defaults.timeout_ms must be an integer, got %T", v))
+		}
 	}
 
 	for i, check := range cfg.Checks {

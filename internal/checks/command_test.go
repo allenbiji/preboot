@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -48,7 +49,7 @@ func TestCommandCheck_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			check := &checks.CommandCheck{Command: tt.command}
-			err := check.Execute()
+			err := check.Execute(context.Background())
 			if (err != nil) != (tt.wantErr != "") {
 				t.Fatalf("wantErr=%q got=%v", tt.wantErr, err)
 			}
@@ -63,7 +64,7 @@ func TestCommandCheck_Execute(t *testing.T) {
 func TestCommandCheck_Execute_StrippedPath(t *testing.T) {
 	t.Setenv("PATH", "")
 	check := &checks.CommandCheck{Command: "go"}
-	err := check.Execute()
+	err := check.Execute(context.Background())
 	if err == nil {
 		t.Fatal("expected error when PATH is empty, got nil")
 	}

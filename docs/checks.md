@@ -74,6 +74,8 @@ command "go" not found in PATH
 
 **Verifies that a file exists at a relative path.**
 
+> **Symlink behavior:** the check uses `os.Stat`, which follows symlinks. A symlink pointing to an existing file passes; a broken symlink (target missing) fails. The check confirms existence only — it does not read file contents.
+
 ### Options
 
 | Key | Required | Description |
@@ -115,6 +117,8 @@ file ".env" not found
 ## `directory_exists`
 
 **Verifies that a directory exists at a relative path.**
+
+> **Symlink behavior:** the check uses `os.Stat`, which follows symlinks. A symlink pointing to an existing directory passes; a broken symlink fails. The check confirms existence only — it does not read directory contents.
 
 ### Options
 
@@ -378,7 +382,7 @@ port 5432 is already in use
 
 ### Notes
 
-- The check attempts a TCP listen on `localhost:<port>`. If the listen succeeds, the port is free and the check passes; if it fails, the port is in use.
+- The check binds `127.0.0.1:<port>` (loopback only). A service that listens exclusively on a non-loopback interface (e.g. `0.0.0.0` on a remote host, or a container network) may not be detected — the port can appear free even when the service is running.
 - Contrast with `tcp_reachable`: `port_free` checks that nothing is listening (port available), whereas `tcp_reachable` checks that something is listening (service up).
 
 ---

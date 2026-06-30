@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,21 +15,20 @@ type FileCheck struct {
 	Path string
 }
 
-// execute method for file check
-func (f *FileCheck) Execute() error {
+// Execute uses os.Stat (follows symlinks) to confirm the path exists and is a file.
+// A symlink pointing to a file passes; a broken symlink or a path that resolves to
+// a directory fails. File contents are never read.
+func (f *FileCheck) Execute(_ context.Context) error {
 	info, err := os.Stat(f.Path)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("File does not exist: %s", f.Path)
+		return fmt.Errorf("file does not exist: %s", f.Path)
 	}
-
 	if err != nil {
-		return fmt.Errorf("Error accessing file %s: %w", f.Path, err)
+		return fmt.Errorf("error accessing file %s: %w", f.Path, err)
 	}
-
 	if info.IsDir() {
-		return fmt.Errorf("Expected a file, returned a directory at %s", f.Path)
+		return fmt.Errorf("expected a file but found a directory: %s", f.Path)
 	}
-
 	return nil
 }
 
@@ -47,7 +47,6 @@ func validateRelativePath(path, field string) error {
 	return nil
 }
 
-// creates file check factory
 func buildFileCheck(cfg model.CheckConfig) (registry.Check, error) {
 	path, ok := cfg.Options["path"]
 	if !ok || path == "" {
@@ -56,12 +55,9 @@ func buildFileCheck(cfg model.CheckConfig) (registry.Check, error) {
 	if err := validateRelativePath(path, "path"); err != nil {
 		return nil, err
 	}
-	return &FileCheck{
-		Path: filepath.Clean(path),
-	}, nil
+	return &FileCheck{Path: filepath.Clean(path)}, nil
 }
 
-// Registers file exists check in registry
 func init() {
 	registry.Register(model.TypeFileExists, buildFileCheck)
 }

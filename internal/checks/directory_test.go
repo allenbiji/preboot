@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,7 +59,7 @@ func TestDirectoryCheck_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			check := &checks.DirectoryCheck{Folder: tt.folder}
-			err := check.Execute()
+			err := check.Execute(context.Background())
 			if (err != nil) != (tt.wantErr != "") {
 				t.Fatalf("wantErr=%q got=%v", tt.wantErr, err)
 			}

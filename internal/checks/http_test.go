@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,7 +21,7 @@ func TestHttpReachableCheck_SelfSignedCert(t *testing.T) {
 	}))
 	defer s.Close()
 	check := &checks.HttpReachableCheck{Address: s.URL, Timeout: 5 * time.Second}
-	err := check.Execute()
+	err := check.Execute(context.Background())
 	if err == nil {
 		t.Fatal("expected TLS error for self-signed cert, got nil")
 	}
@@ -183,7 +184,7 @@ func TestHttpReachableCheck_Execute(t *testing.T) {
 				addr = s.URL
 			}
 			check := &checks.HttpReachableCheck{Address: addr, Timeout: tt.timeout}
-			err := check.Execute()
+			err := check.Execute(context.Background())
 			if (err != nil) != (tt.wantErr != "") {
 				t.Fatalf("wantErr=%q got=%v", tt.wantErr, err)
 			}

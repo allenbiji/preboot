@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"net"
 	"os"
 	"strconv"
@@ -52,7 +53,7 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 		defer l.Close()
 		port := strconv.Itoa(l.Addr().(*net.TCPAddr).Port)
 		check := &checks.PortFreeCheck{Port: port}
-		err = check.Execute()
+		err = check.Execute(context.Background())
 		if err == nil {
 			t.Fatal("expected error for port in use, got nil")
 		}
@@ -72,7 +73,7 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 		l.Close()
 
 		check := &checks.PortFreeCheck{Port: port}
-		if err := check.Execute(); err != nil {
+		if err := check.Execute(context.Background()); err != nil {
 			t.Errorf("expected nil for free port, got: %v", err)
 		}
 	})
@@ -85,7 +86,7 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 			t.Skip("running as root — privileged port test skipped")
 		}
 		check := &checks.PortFreeCheck{Port: "80"}
-		err := check.Execute()
+		err := check.Execute(context.Background())
 		if err == nil {
 			t.Fatal("expected error for privileged port as non-root, got nil")
 		}
