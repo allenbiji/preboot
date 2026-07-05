@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"net"
 	"os"
 	"strconv"
@@ -45,14 +46,17 @@ func TestBuildPortFreeCheck(t *testing.T) {
 func TestPortFreeCheck_Execute(t *testing.T) {
 	t.Run("port in use", func(t *testing.T) {
 		t.Parallel()
-		l, err := net.Listen("tcp", ":0")
+		// Listen on 127.0.0.1 explicitly: the check binds 127.0.0.1, and a
+		// wildcard ":0" listener can land on an IPv6-only socket in some CI
+		// environments, leaving the IPv4 loopback port free.
+		l, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer l.Close()
 		port := strconv.Itoa(l.Addr().(*net.TCPAddr).Port)
 		check := &checks.PortFreeCheck{Port: port}
-		err = check.Execute()
+		err = check.Execute(context.Background())
 		if err == nil {
 			t.Fatal("expected error for port in use, got nil")
 		}
@@ -63,8 +67,8 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 
 	t.Run("port free", func(t *testing.T) {
 		t.Parallel()
-		// Bind on :0 to get an ephemeral port, then release it.
-		l, err := net.Listen("tcp", ":0")
+		// Bind on 127.0.0.1:0 to get an ephemeral port, then release it.
+		l, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -72,7 +76,7 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 		l.Close()
 
 		check := &checks.PortFreeCheck{Port: port}
-		if err := check.Execute(); err != nil {
+		if err := check.Execute(context.Background()); err != nil {
 			t.Errorf("expected nil for free port, got: %v", err)
 		}
 	})
@@ -85,7 +89,7 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 			t.Skip("running as root — privileged port test skipped")
 		}
 		check := &checks.PortFreeCheck{Port: "80"}
-		err := check.Execute()
+		err := check.Execute(context.Background())
 		if err == nil {
 			t.Fatal("expected error for privileged port as non-root, got nil")
 		}

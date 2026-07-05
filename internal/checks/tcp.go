@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"strconv"
@@ -15,14 +16,13 @@ type TcpReachableCheck struct {
 	Timeout time.Duration
 }
 
-func (t *TcpReachableCheck) Execute() error {
-	conn, err := net.DialTimeout("tcp", t.Address, t.Timeout)
+func (t *TcpReachableCheck) Execute(ctx context.Context) error {
+	dialer := &net.Dialer{Timeout: t.Timeout}
+	conn, err := dialer.DialContext(ctx, "tcp", t.Address)
 	if err != nil {
 		return fmt.Errorf("tcp address %q is not reachable: %w", t.Address, err)
 	}
-
 	defer conn.Close()
-
 	return nil
 }
 
@@ -45,7 +45,6 @@ func buildTcpReachableCheck(cfg model.CheckConfig) (registry.Check, error) {
 	if !ok || address == "" {
 		return nil, fmt.Errorf("tcp_reachable check requires an 'address' option")
 	}
-
 	if err := validateTCPAddress(address); err != nil {
 		return nil, err
 	}
@@ -57,10 +56,7 @@ func buildTcpReachableCheck(cfg model.CheckConfig) (registry.Check, error) {
 		}
 	}
 
-	return &TcpReachableCheck{
-		Address: address,
-		Timeout: timeout,
-	}, nil
+	return &TcpReachableCheck{Address: address, Timeout: timeout}, nil
 }
 
 func init() {

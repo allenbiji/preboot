@@ -107,7 +107,7 @@ func TestInitCmd_ReadOnlyFile_ForceErrors(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error writing to read-only file, got nil")
 	}
-	if !strings.Contains(err.Error(), "permission") {
-		t.Errorf("error %q does not contain 'permission'", err.Error())
+	if !os.IsPermission(err) {
+		t.Errorf("error %q is not a permission error", err.Error())
 	}
 }

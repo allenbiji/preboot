@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/allenbiji/preboot/internal/engine"
+	"github.com/allenbiji/preboot/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,7 @@ func RootCmd() *cobra.Command {
 		Use:           "preboot",
 		Short:         "Preboot handles local setup diagnostics",
 		Long:          "An open-source CLI for diagnosing local development setup failures in repositories.",
+		Version:       version.Version(),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {

@@ -1,14 +1,16 @@
 package registry
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/allenbiji/preboot/internal/model"
 )
 
-// Check is the strict contract that every single diagnostic test must follow.
+// Check is the strict contract that every diagnostic test must follow.
+// The ctx carries cancellation — long-running checks (HTTP, TCP) must respect it.
 type Check interface {
-	Execute() error
+	Execute(ctx context.Context) error
 }
 
 // Factory is a function that takes the user's config and returns an executable Check.
@@ -20,9 +22,8 @@ var backend = make(map[model.CheckType]Factory)
 // Register is called by individual checks during application startup.
 func Register(checkType model.CheckType, factory Factory) {
 	if _, exists := backend[checkType]; exists {
-		panic(fmt.Sprintf("Check type %s is already registered", checkType))
+		panic(fmt.Sprintf("check type %s is already registered", checkType))
 	}
-
 	backend[checkType] = factory
 }
 

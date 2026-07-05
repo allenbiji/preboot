@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -14,7 +15,7 @@ type EnvCheck struct {
 	EnvMap map[string]string
 }
 
-func (e *EnvCheck) Execute() error {
+func (e *EnvCheck) Execute(_ context.Context) error {
 	val, exists := e.EnvMap[e.Key]
 	if !exists {
 		return fmt.Errorf("key %q not found in .env", e.Key)

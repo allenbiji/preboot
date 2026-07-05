@@ -1,6 +1,7 @@
 package registry_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 
 type stubCheck struct{}
 
-func (s *stubCheck) Execute() error { return nil }
+func (s *stubCheck) Execute(_ context.Context) error { return nil }
 
 func TestRegister_Build(t *testing.T) {
 	const typ model.CheckType = "stub_for_registry_test"

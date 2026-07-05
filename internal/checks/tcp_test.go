@@ -1,6 +1,7 @@
 package checks_test
 
 import (
+	"context"
 	"net"
 	"strings"
 	"testing"
@@ -90,7 +91,7 @@ func TestTcpReachableCheck_Execute(t *testing.T) {
 		}
 		defer l.Close()
 		check := &checks.TcpReachableCheck{Address: l.Addr().String(), Timeout: 5 * time.Second}
-		if err := check.Execute(); err != nil {
+		if err := check.Execute(context.Background()); err != nil {
 			t.Errorf("expected nil for open port, got: %v", err)
 		}
 	})
@@ -98,7 +99,7 @@ func TestTcpReachableCheck_Execute(t *testing.T) {
 	t.Run("port closed", func(t *testing.T) {
 		t.Parallel()
 		check := &checks.TcpReachableCheck{Address: "127.0.0.1:1", Timeout: 1 * time.Second}
-		err := check.Execute()
+		err := check.Execute(context.Background())
 		if err == nil {
 			t.Fatal("expected error for closed port, got nil")
 		}
@@ -115,7 +116,7 @@ func TestTcpReachableCheck_Execute(t *testing.T) {
 		const timeout = 100 * time.Millisecond
 		check := &checks.TcpReachableCheck{Address: "192.0.2.1:9999", Timeout: timeout}
 		start := time.Now()
-		err := check.Execute()
+		err := check.Execute(context.Background())
 		elapsed := time.Since(start)
 
 		if err == nil {

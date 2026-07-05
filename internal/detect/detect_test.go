@@ -196,10 +196,10 @@ func TestScanRepo_AllArtifacts(t *testing.T) {
 	chdir(t, dir)
 
 	files := map[string]string{
-		"go.mod":            "module example\ngo 1.21\n",
-		"Makefile":          "build:\n\tgo build\n",
+		"go.mod":             "module example\ngo 1.21\n",
+		"Makefile":           "build:\n\tgo build\n",
 		"docker-compose.yml": "services:\n  app:\n    ports:\n      - \"8080:8080\"\n",
-		".env.example":      "SECRET_KEY=\n",
+		".env.example":       "SECRET_KEY=\n",
 	}
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0644); err != nil {
