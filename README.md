@@ -1,4 +1,4 @@
-# PreBoot
+# preboot
 
 **"Why doesn't it work on my machine?"**
 
