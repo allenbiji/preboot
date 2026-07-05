@@ -46,7 +46,10 @@ func TestBuildPortFreeCheck(t *testing.T) {
 func TestPortFreeCheck_Execute(t *testing.T) {
 	t.Run("port in use", func(t *testing.T) {
 		t.Parallel()
-		l, err := net.Listen("tcp", ":0")
+		// Listen on 127.0.0.1 explicitly: the check binds 127.0.0.1, and a
+		// wildcard ":0" listener can land on an IPv6-only socket in some CI
+		// environments, leaving the IPv4 loopback port free.
+		l, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -64,8 +67,8 @@ func TestPortFreeCheck_Execute(t *testing.T) {
 
 	t.Run("port free", func(t *testing.T) {
 		t.Parallel()
-		// Bind on :0 to get an ephemeral port, then release it.
-		l, err := net.Listen("tcp", ":0")
+		// Bind on 127.0.0.1:0 to get an ephemeral port, then release it.
+		l, err := net.Listen("tcp", "127.0.0.1:0")
 		if err != nil {
 			t.Fatal(err)
 		}

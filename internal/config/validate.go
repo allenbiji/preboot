@@ -65,7 +65,7 @@ func ValidateConfig(cfg *model.PrebootConfig) error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("Configuration validation failed:\n  - %s", strings.Join(errs, "\n  - "))
+		return fmt.Errorf("configuration validation failed:\n  - %s", strings.Join(errs, "\n  - "))
 	}
 
 	return nil

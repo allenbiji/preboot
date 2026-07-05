@@ -5,6 +5,23 @@
 PreBoot diagnoses local setup failures. Define your project's environment requirements in YAML, run one command, and get a clear pass/fail report with actionable fixes.
 
 
+## Installation
+
+**Prebuilt binaries** — download the archive for your platform from the [latest release](https://github.com/allenbiji/preboot/releases/latest), extract it, and place `preboot` on your `PATH`.
+
+**With Go** (1.25+):
+
+```bash
+go install github.com/allenbiji/preboot/cmd/preboot@latest
+```
+
+Verify the install:
+
+```bash
+preboot --version
+```
+
+
 ## Quick Start
 
 ```bash
@@ -109,6 +126,7 @@ A check in `preboot.yml` with the same `name` as one in `preboot-auto.yml` overr
 - [Architecture](docs/architecture.md) — Package map, data flow, extension points
 - [Contributing](docs/contributing.md) — Dev setup, adding check types, conventions
 - [Testing Guide](docs/testing.md) — Test patterns and coverage rules
+- [Manual Test Plan](docs/manual-test-plan.md) — Pre-release install and functional QA matrix
 
 ---
 

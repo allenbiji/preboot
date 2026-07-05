@@ -34,7 +34,7 @@ func extractHostPort(mapping string) string {
 	return ""
 }
 
-func detectDockerCompose() []model.CheckConfig{
+func detectDockerCompose() []model.CheckConfig {
 	var checks []model.CheckConfig
 
 	var targetFile string
@@ -48,11 +48,11 @@ func detectDockerCompose() []model.CheckConfig{
 	}
 
 	checks = append(checks, model.CheckConfig{
-		Name: "docker-installed",
-		Type: model.TypeCommandExists,
+		Name:     "docker-installed",
+		Type:     model.TypeCommandExists,
 		Severity: model.SeverityBlocker,
-		Options: map[string]string{"command": "docker"},
-		Message: "Docker is required for running local infrastructure",
+		Options:  map[string]string{"command": "docker"},
+		Message:  "Docker is required for running local infrastructure",
 	})
 
 	data, err := os.ReadFile(targetFile)
@@ -96,5 +96,3 @@ func detectDockerCompose() []model.CheckConfig{
 
 	return checks
 }
-
-

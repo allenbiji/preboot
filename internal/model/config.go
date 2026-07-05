@@ -35,6 +35,6 @@ type CheckConfig struct {
 // this is the type for the global preboot config in its yaml file
 type PrebootConfig struct {
 	Version  int                    `yaml:"version"`
-	Defaults map[string]interface{} `yaml:"defaults"` 
+	Defaults map[string]interface{} `yaml:"defaults"`
 	Checks   []CheckConfig          `yaml:"checks"`
 }
