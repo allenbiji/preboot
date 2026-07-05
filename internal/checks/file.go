@@ -33,7 +33,10 @@ func (f *FileCheck) Execute(_ context.Context) error {
 }
 
 func validateRelativePath(path, field string) error {
-	if filepath.IsAbs(path) {
+	// filepath.IsAbs alone misses Unix-style rooted paths ("/tmp") on Windows,
+	// where a leading "/" is rooted (resolves against the current drive) but
+	// not "absolute" by Go's definition. Catch both.
+	if filepath.IsAbs(path) || strings.HasPrefix(filepath.ToSlash(path), "/") {
 		return fmt.Errorf("%s %q must be a relative path, not an absolute path", field, path)
 	}
 	if strings.HasPrefix(path, "~") {
