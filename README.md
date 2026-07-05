@@ -1,11 +1,22 @@
-# preboot
+<p align="center">
+  <img width="777" alt="PreBoot" src="https://github.com/user-attachments/assets/1b39cc52-dd37-4ee1-8ef1-6f46c75e6218" />
+</p>
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/allenbiji/preboot.svg)](https://pkg.go.dev/github.com/allenbiji/preboot)
+<br>
 
-**"Why doesn't it work on my machine?"**
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/allenbiji/preboot">
+    <img src="https://pkg.go.dev/badge/github.com/allenbiji/preboot.svg" alt="Go Reference">
+  </a>
+</p>
+
+<br>
+
+# Why won't this project run on my machine?
 
 PreBoot diagnoses local setup failures. Define your project's environment requirements in YAML, run one command, and get a clear pass/fail report with actionable fixes.
 
+<br>
 
 ## Installation
 
