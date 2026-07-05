@@ -1,5 +1,7 @@
 # preboot
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/allenbiji/preboot.svg)](https://pkg.go.dev/github.com/allenbiji/preboot)
+
 **"Why doesn't it work on my machine?"**
 
 PreBoot diagnoses local setup failures. Define your project's environment requirements in YAML, run one command, and get a clear pass/fail report with actionable fixes.
